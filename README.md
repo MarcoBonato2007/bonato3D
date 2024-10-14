@@ -1,8 +1,9 @@
 # Bonato3D, my own graphics (OpenGL & GLFW), game and physics engine (work in progress)
 
-## Current progress: a white cube
+## Current progress: a colored cube
 You can move around and change your view direction to see this cube from different angles. That's it FOR NOW.
-![image](https://github.com/user-attachments/assets/027e3e98-243e-46ef-aa10-3c9f5d7e3862)
+![2024-10-14 12_35_04-Engine](https://github.com/user-attachments/assets/702883d7-c71b-4198-ac41-bd594505b604)
+
 
 ## Methodology / algorithms
 The algorithms for frustum culling (incl. the is_line_visible function), triangle clipping, camera translation and rotation I have created myself, 

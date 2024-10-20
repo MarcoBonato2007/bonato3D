@@ -5,13 +5,16 @@
 #include "player.h"
 #include "constants.h"
 
+#include <iostream>
+
 void draw(Camera camera, std::vector<Triangle> triangles) {
-    glClear(GL_COLOR_BUFFER_BIT); // Clear all colors on the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     std::vector<Triangle> new_triangles = {};
 
     for (auto triangle: triangles) {
         for (auto processed_triangle: camera.process_triangle(triangle)) {
+            // processed triangle is a tuple of 3 vertices, so we get each one
             Triangle new_triangle = Triangle(
                 std::get<0>(processed_triangle),
                 std::get<1>(processed_triangle),
@@ -53,6 +56,8 @@ int main() {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
 
+    glEnable(GL_DEPTH_TEST);
+
     Player player = Player(
         glm::vec4 {0, 0, 0, 1},
         glm::vec4 {0, 0, 0, 1},
@@ -62,7 +67,8 @@ int main() {
         (float) width/height,
         0.1, 
         1000, 
-        1, 
+        4, 
+        40,
         1
     );
 
@@ -183,7 +189,25 @@ int main() {
             11, 
             16, 
             54
-        )
+        ),
+        Triangle (
+            glm::vec4 {-100, 0, -100, 1},
+            glm::vec4 {-100, 0, 100, 1},
+            glm::vec4 {100, 0, -100, 1},
+            glm::vec4 {0, 1, 0, 1},
+            255,
+            255,
+            255
+        ),
+        Triangle (
+            glm::vec4 {100, 0, 100, 1},
+            glm::vec4 {-100, 0, 100, 1},
+            glm::vec4 {100, 0, -100, 1},
+            glm::vec4 {0, 1, 0, 1},
+            255,
+            255,
+            255
+        ),
     };  
 
     while (!glfwWindowShouldClose(window)) {
@@ -196,9 +220,8 @@ int main() {
         cur_time = glfwGetTime();
         delta_time = cur_time - prev_time;
 
-        player.step(delta_time, glm::vec4 {0, 0, -9.80665, 0});
         player.collision_handler();
-        player.keyboard_handler(window, delta_time);
+        player.step(window, delta_time);
 
         glfwGetCursorPos(window, &cursor_x, &cursor_y);
         player.mouse_handler(width, height, cursor_x-prev_cursor_x, cursor_y-prev_cursor_y, delta_time);
@@ -211,15 +234,11 @@ int main() {
     return 0;
 }
 
-// Split the code up into multiple files, make it nice and modular
-// Test frustum cullingaaw
-// Fix the triangle clipping (atm not working for large triangles since checking for line visibility isnt perfect)
-// Depth buffering, make sure multiple objects are drawn correctly
+// Implement friction (how to detect if someone is sliding? (no movement accel when touching)
 // Import external models (like obj files)
 // Occlusion culling
 // Shaders
 // Lighting
-// Implement the jumping mechanic
 // Make sure deltaTime is working correctly, consider what happens on lag spikes
 // Implement a player model
 // Collision detection (bounding volumes?, quadtrees, BSP trees, octtrees, BVH, kd-trees), test using a floor
@@ -237,7 +256,6 @@ int main() {
 // Give GPU commands all at once
 // Use instancing and batching
 // Think of the best differential equation solver to use (verlet, leapfrog, runge-kutta, satisfying contraint functions, etc.)
-// Implement friction and drag (think if you really need these, consider things like bullets, jumping off cliffs, sliding down stuff)
 // Optimize models and imported files, what if u make ur own format in binary?
 // Caching (save and reuse stuff instead of recalculating)
 // Try to make branchless code (avoid if/else statements)

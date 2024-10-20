@@ -5,8 +5,8 @@
 
 struct Object {
     glm::vec4 pos = {0, 0, 0, 1};
-    glm::vec4 vel = {0, 0, 0, 1};
-    glm::vec4 accel = {0, 0, 0, 1};
+    glm::vec4 vel = {0, 0, 0, 0};
+    glm::vec4 accel = {0, 0, 0, 0};
     float mass = 0;
 
     Object() {}
@@ -20,8 +20,12 @@ struct Object {
 
     void step(float time_step, glm::vec4 new_accel) {
         // Verlet integration
-        pos += time_step * (vel + 1/2*time_step*accel);
-        vel += 1/2*time_step*(accel + new_accel);
+
+        // Drag formula: 1/2*air density*area*drag coefficient * velocity squared
+        new_accel -= 0.5f*1.225f*1*1*glm::length(vel)*vel/mass;
+
+        pos += time_step * (vel + 0.5f*time_step*accel);
+        vel += 0.5f*time_step*(accel + new_accel);
     }
 };
 

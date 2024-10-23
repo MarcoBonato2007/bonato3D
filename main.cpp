@@ -1,48 +1,37 @@
+#include <glad/glad.h>
+#include "glad.c"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <vector>
-#include "triangle.h"
-#include "player.h"
-#include "constants.h"
-
 #include <iostream>
 
-void draw(Camera camera, std::vector<Triangle> triangles) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#include "shader.h"
+#include "constants.h"
+#include "player.h"
 
-    std::vector<Triangle> new_triangles = {};
+GLfloat vertices[] = { // 3 vals for position, then 4 vals for color
+    -0.5f, 0.5f, 5.0f,   0.2f, 0.3f, 0.1f, 1.0f,
+    0.5f, 0.5f, 5.0f,   0.1f, 0.3f, 0.6f, 1.0f,
+    0.5f, -0.5f, 5.0f,   0.6f, 0.1f, 0.90f, 1.0f,
+    -0.5f, -0.5f, 5.0f,  0.9f, 0.3f, 0.7f, 1.0f,
 
-    for (auto triangle: triangles) {
-        for (auto processed_triangle: camera.process_triangle(triangle)) {
-            // processed triangle is a tuple of 3 vertices, so we get each one
-            Triangle new_triangle = Triangle(
-                std::get<0>(processed_triangle),
-                std::get<1>(processed_triangle),
-                std::get<2>(processed_triangle),
-                triangle.normal,
-                triangle.red,
-                triangle.green,
-                triangle.blue
-            );
-            new_triangles.push_back(new_triangle);
-        }
-    }
+    -0.5f, 0.5f, 6.0f,   0.46f, 0.2f, 0.8f, 1.0f,
+    0.5f, 0.5f, 6.0f,   0.67f, 0.69f, 0.4f, 1.0f,
+    0.5f, -0.5f, 6.0f,   0.84f, 0.20f, 0.14f, 1.0f,
+    -0.5f, -0.5f, 6.0f,  0.48f, 0.27f, 0.84f, 1.0f,
+};
 
-    for (auto triangle: new_triangles) {
-        triangle.vert1 = camera.projection*triangle.vert1;
-        triangle.vert2 = camera.projection*triangle.vert2;
-        triangle.vert3 = camera.projection*triangle.vert3;
-
-        glColor3ub(triangle.red, triangle.green, triangle.blue);
-        glBegin(GL_TRIANGLES);
-            glVertex4f(triangle.vert1.x, triangle.vert1.y, triangle.vert1.z, triangle.vert1.w);
-            glVertex4f(triangle.vert2.x, triangle.vert2.y, triangle.vert2.z, triangle.vert2.w);
-            glVertex4f(triangle.vert3.x, triangle.vert3.y, triangle.vert3.z, triangle.vert3.w);
-        glEnd();
-    }
-
-    glFlush();
-}
+GLuint indices[] = { // Specifies the triangles to draw using indices from the vertices given
+    2, 1, 0,
+    2, 0, 3,
+    6, 4, 5,
+    6, 7, 4,
+    3, 0, 4,
+    3, 4, 7,
+    6, 5, 1,
+    6, 1, 2,
+    1, 5, 4, 
+    1, 4, 0
+};  
 
 int main() {
     glfwInit();
@@ -56,21 +45,42 @@ int main() {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
 
-    glEnable(GL_DEPTH_TEST);
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE); // counterclockwise winding faces are visible
+
+    Shader shader("vert_shader.vert", "frag_shader.frag");
     Player player = Player(
         glm::vec4 {0, 0, 0, 1},
         glm::vec4 {0, 0, 0, 1},
         glm::vec4 {0, 0, 0, 1},
         70, 
         PI/2,
-        (float) width/height,
+        (float) (mode->width)/(mode->height),
         0.1, 
         1000, 
         4, 
         40,
         1
     );
+
+    GLuint VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7*sizeof(GLfloat), (void*) 0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7*sizeof(GLfloat), (void*) (3*sizeof(GLfloat)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    GLuint look_at_location = glGetUniformLocation(shader.ID, "look_at");
+    GLuint projection_location = glGetUniformLocation(shader.ID, "projection");
 
     float prev_time = 0;
     float cur_time = 0;
@@ -81,142 +91,19 @@ int main() {
     glfwGetCursorPos(window, &cursor_x, &cursor_y);
     glfwGetCursorPos(window, &prev_cursor_x, &prev_cursor_y);
 
-    std::vector<Triangle> triangles = {
-        Triangle (
-            glm::vec4 {-0.5, 1, 5, 1}, 
-            glm::vec4 {0.5, 1, 5, 1},
-            glm::vec4 {0.5, 0, 5, 1},
-            glm::vec4 {0, 0, -1, 1},
-            167, 
-            255, 
-            200
-        ), 
-        Triangle (
-            glm::vec4 {-0.5, 1, 5, 1}, 
-            glm::vec4 {0.5, 0, 5, 1},
-            glm::vec4 {-0.5, 0, 5, 1},
-            glm::vec4 {0, 0, -1, 1},
-            0, 
-            0, 
-            3    
-        ),
-        Triangle (
-            glm::vec4 {-0.5, 1, 6, 1}, 
-            glm::vec4 {0.5, 1, 6, 1}, 
-            glm::vec4 {0.5, 0, 6, 1}, 
-            glm::vec4 {0, 0, 1, 1},
-            4, 
-            192, 
-            78
-        ),
-        Triangle (
-            glm::vec4 {-0.5, 1, 6, 1}, 
-            glm::vec4 {0.5, 0, 6, 1}, 
-            glm::vec4 {-0.5, 0, 6, 1},      
-            glm::vec4 {0, 0, 1, 1},
-            255, 
-            0, 
-            255
-        ),
-        Triangle (
-            glm::vec4 {-0.5, 1, 5, 1}, 
-            glm::vec4 {0.5, 1, 5, 1}, 
-            glm::vec4 {-0.5, 1, 6, 1}, 
-            glm::vec4 {0, 1, 0, 1},
-            49, 
-            82, 
-            6
-        ),
-        Triangle (
-            glm::vec4 {0.5, 1, 5, 1}, 
-            glm::vec4 {-0.5, 1, 6, 1}, 
-            glm::vec4 {0.5, 1, 6, 1}, 
-            glm::vec4 {0, 1, 0, 1},
-            212, 
-            111, 
-            69
-        ),
-        Triangle (
-            glm::vec4 {-0.5, 0, 5, 1}, 
-            glm::vec4 {0.5, 0, 5, 1}, 
-            glm::vec4 {-0.5, 0, 6, 1}, 
-            glm::vec4 {0, -1, 0, 1},
-            69, 
-            69, 
-            69
-        ),
-        Triangle (
-            glm::vec4 {0.5, 0, 5, 1}, 
-            glm::vec4 {-0.5, 0, 6, 1}, 
-            glm::vec4 {0.5, 0, 6, 1}, 
-            glm::vec4 {0, -1, 0, 1},
-            5, 
-            10, 
-            15
-        ),
-        Triangle (
-            glm::vec4 {0.5, 1, 5, 1}, 
-            glm::vec4 {0.5, 0, 5, 1}, 
-            glm::vec4 {0.5, 1, 6, 1}, 
-            glm::vec4 {1, 0, 0, 1},
-            74, 
-            34, 
-            80
-        ),
-        Triangle (
-            glm::vec4 {0.5, 0, 5, 1}, 
-            glm::vec4 {0.5, 0, 6, 1}, 
-            glm::vec4 {0.5, 1, 6, 1}, 
-            glm::vec4 {1, 0, 0, 1},
-            255, 
-            242, 
-            56
-        ),
-        Triangle (
-            glm::vec4 {-0.5, 1, 5, 1}, 
-            glm::vec4 {-0.5, 0, 5, 1}, 
-            glm::vec4 {-0.5, 1, 6, 1}, 
-            glm::vec4 {-1, 0, 0, 1},
-            12, 
-            98, 
-            255
-        ),
-        Triangle (
-            glm::vec4 {-0.5, 0, 6, 1}, 
-            glm::vec4 {-0.5, 0, 5, 1}, 
-            glm::vec4 {-0.5, 1, 6, 1}, 
-            glm::vec4 {-1, 0, 0, 1},
-            11, 
-            16, 
-            54
-        ),
-        Triangle (
-            glm::vec4 {-100, 0, -100, 1},
-            glm::vec4 {-100, 0, 100, 1},
-            glm::vec4 {100, 0, -100, 1},
-            glm::vec4 {0, 1, 0, 1},
-            255,
-            255,
-            255
-        ),
-        Triangle (
-            glm::vec4 {100, 0, 100, 1},
-            glm::vec4 {-100, 0, 100, 1},
-            glm::vec4 {100, 0, -100, 1},
-            glm::vec4 {0, 1, 0, 1},
-            255,
-            255,
-            255
-        ),
-    };  
-
     while (!glfwWindowShouldClose(window)) {
-        draw(player.camera, triangles);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        glm::mat4 look_at, normal_look_at;
+        std::tie(look_at, normal_look_at) = player.camera.get_look_at();
 
-        // Now we handle things like physics and moving around
+        glUniformMatrix4fv(look_at_location, 1, GL_FALSE, &look_at[0][0]);
+        glUniformMatrix4fv(projection_location, 1, GL_FALSE, &player.camera.projection[0][0]);
+
+        shader.execute();
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, 0);
+
         cur_time = glfwGetTime();
         delta_time = cur_time - prev_time;
 
@@ -229,41 +116,13 @@ int main() {
         prev_cursor_y = cursor_y;
 
         prev_time = cur_time;
+
+        glfwPollEvents();
+        glfwSwapBuffers(window);
     }
 
+    glfwTerminate();
     return 0;
 }
 
-// Implement friction (how to detect if someone is sliding? (no movement accel when touching)
-// Import external models (like obj files)
-// Occlusion culling
-// Shaders
-// Lighting
-// Make sure deltaTime is working correctly, consider what happens on lag spikes
-// Implement a player model
-// Collision detection (bounding volumes?, quadtrees, BSP trees, octtrees, BVH, kd-trees), test using a floor
-// Realize that things like BSP trees can be precomputed for a reused map
-// Add inter-frame detection (required for fast moving objects)
-// Levels of detail
-// Mipmapping
-// Stencil buffer
-// Scissor test
-// Triangle strips (optimize drawing)
-// Bounding volumes for objects
-// Frustum cull objects instead of triangles?
-// Optimize triangle storage (like storing color by bitmasking uints or storing normals with only 2 values)
-// For frustum culling, iterate over bounding meshes vs iterate over triangles?
-// Give GPU commands all at once
-// Use instancing and batching
-// Think of the best differential equation solver to use (verlet, leapfrog, runge-kutta, satisfying contraint functions, etc.)
-// Optimize models and imported files, what if u make ur own format in binary?
-// Caching (save and reuse stuff instead of recalculating)
-// Try to make branchless code (avoid if/else statements)
-// Compute shader
-// Temporal reprojection (use info from previous frame to inform current frame)
-// Antialiasing (research the various methods)
-// Hierarchical z-buffer
-// Floating point precision is higher near 0, so check projection for outputted z values
-// Depth prepass
-// For rigid body physics (if used), see YT video by blackedout01
-// Go back through code, clean up, make more readable, optimize
+// Swap to using triangle strips

@@ -10,4 +10,3 @@ glm::vec3 Y = glm::vec3 {0, 1, 0};
 glm::vec3 Z = glm::vec3 {0, 0, 1}; // May be unused
 
 #endif
-

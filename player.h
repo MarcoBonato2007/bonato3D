@@ -4,8 +4,6 @@
 #include "camera.h"
 #include "object.h"
 
-#include <iostream>
-
 struct Player: Object {
     Camera camera;
     float rotation_speed;
@@ -116,7 +114,6 @@ struct Player: Object {
                 movement_velocity = {0, 0, 0, 0};
                 new_movement_accel = {0, 0, 0, 0};
             }
-
         }
 
         return new_movement_accel;
@@ -130,9 +127,9 @@ struct Player: Object {
         float delta_time
     ) {
         glm::vec3 view_change = {
-            dx*(2*camera.near*camera.tan_half_x_fov/screen_width), 
-            -dy*(2*camera.near*camera.tan_half_y_fov/screen_height), 
-            camera.near
+            dx*(2*camera.near_dist*camera.tan_half_x_fov/screen_width), 
+            -dy*(2*camera.near_dist*camera.tan_half_y_fov/screen_height), 
+            camera.near_dist
         };
 
         view_change = glm::normalize(view_change);

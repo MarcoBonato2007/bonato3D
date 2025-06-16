@@ -50,8 +50,8 @@ int main() {
 
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE); // counterclockwise winding faces are visible
+    glEnable(GL_DEPTH_TEST); // New elements only added if they have a lower depth
+    glEnable(GL_CULL_FACE); // counterclockwise winding faces only are visible
 
     Shader shader("shaders/vert_shader.vert", "shaders/frag_shader.frag");
     Player player = Player(
@@ -161,6 +161,11 @@ int main() {
     glfwTerminate();
     return 0;
 }
+
+// Remind yourself how this works
+// Go through it step by step, understand wtf is going on
+// Consider a code rework / redo
+// Check tutorial website
 
 // Containerize code into individual mesh (each mesh has a single texture)
 // Import external models (see learnopengl tutorial, remember that multiple meshes can make a single object)

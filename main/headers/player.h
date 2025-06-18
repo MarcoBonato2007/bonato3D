@@ -134,13 +134,14 @@ struct Player: Object {
 
         view_change = glm::normalize(view_change);
         float cam_yaw_change = asin(-view_change.x);
-        float cam_pitch_change = asin(view_change.y/cos(cam_yaw_change));
+        float cam_pitch_change = asin(view_change.y/cos(cam_yaw_change));      
 
         camera.pitch += cam_pitch_change*rotation_speed;
         if (camera.pitch > 90) {
             camera.pitch = 90;
         }
         camera.yaw += cam_yaw_change*rotation_speed;
+
     }
 };
 

@@ -167,7 +167,7 @@ int main() {
 // Consider a code rework / redo
 // Check tutorial website
 
-// Containerize code into individual mesh (each mesh has a single texture)
+// Don't bother with textures for now. Get functionality to load in external meshes.
 // Import external models (see learnopengl tutorial, remember that multiple meshes can make a single object)
 // Have each object store a model matrix (containing translation and rotation, to get to world space)
 // Try to group all static objects together
@@ -180,17 +180,6 @@ int main() {
 // Optimize frustum culling w/ acceleration structured like BVH, BSP tree and octree (so that you don't check every object)
 // Consider possibly using a quadtree if frustum culling on the y axis isn't that important
 // Precompute the acceleration structure for a static scene
-
-// Implement a player model
-// Collision detection (bounding volumes?, quadtrees, BSP trees, octtrees, BVH, kd-trees)
-// Test collision detection with a floor and other objects
-
-// Make sure deltaTime is working correctly, consider what happens on lag spikes
-// Add inter-frame collision detection (required for fast moving objects)
-
-// More features to add:
-    // Lighting (see learnopengl tutorial, do a simple trickery like phong lighting)
-    // Friction (how to detect if someone is sliding? (no movement accel when touching)
 
 // List of optimizations
     // MAKE THE SCENE SLOWER BEFORE! Or check the time in ms of render calls
@@ -214,6 +203,19 @@ int main() {
     // Hierarchical z-buffer?
     // Depth prepass
 
-// For rigid body physics (if used), see YT video by blackedout01
-// Go back through code, clean up, make more readable, optimize
-// Optimize data stuff, like using short ints for indices for models
+// Make the project into a 3d model viewer.
+
+// Perhaps expand into a physics/game engine:
+    // Implement a player model
+    // Collision detection (bounding volumes?, quadtrees, BSP trees, octtrees, BVH, kd-trees)
+    // Test collision detection with a floor and other objects
+
+    // Make sure deltaTime is working correctly, consider what happens on lag spikes
+    // Add inter-frame collision detection (required for fast moving objects)
+
+    // More features to add:
+        // Lighting (see learnopengl tutorial, do a simple trickery like phong lighting)
+        // Friction (how to detect if someone is sliding? (no movement accel when touching)
+
+    // For rigid body physics (if used), see YT video by blackedout01
+    // Optimize data stuff, like using short ints for indices for models

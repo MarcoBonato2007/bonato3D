@@ -7,6 +7,10 @@
 #include <glm/glm.hpp> // OpenGL Math library
 #include <iostream> // for debugging by printing to terminal
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 // #define STB_IMAGE_IMPLEMENTATION
 // #include "lib_files/stb_image.h" // for handling images
 
@@ -138,11 +142,16 @@ int main() { // contains some initializations and main loop
 
         cur_time = glfwGetTime();
         camera.keyboard_handler(window, cur_time-prev_time);
+
+        std::cout << cur_time-prev_time << " (" << camera.pos.x << " " << camera.pos.y << " " << camera.pos.z << ") " << camera.pitch << " " << camera.yaw << "\n";
+
         prev_time = cur_time;
     }
 
     glfwTerminate();
     return 0;
-
-    // try using opengl builtin mouse handler function
 }
+
+// TODO: Import external mesh
+// TODO: Import multiple until it lags
+// TODO: Work on optimizations a bunch

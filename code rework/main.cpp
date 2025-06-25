@@ -7,10 +7,6 @@
 #include <glm/glm.hpp> // OpenGL Math library
 #include <iostream> // for debugging by printing to terminal
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 // #define STB_IMAGE_IMPLEMENTATION
 // #include "lib_files/stb_image.h" // for handling images
 
@@ -73,6 +69,8 @@ GLuint specify_vertices() {
     glBindVertexArray(VAO); // sets current Vertex Array to this VAO.
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    // creates the buffers for vertices and indices
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
@@ -143,7 +141,7 @@ int main() { // contains some initializations and main loop
         cur_time = glfwGetTime();
         camera.keyboard_handler(window, cur_time-prev_time);
 
-        std::cout << cur_time-prev_time << " (" << camera.pos.x << " " << camera.pos.y << " " << camera.pos.z << ") " << camera.pitch << " " << camera.yaw << "\n";
+        // std::cout << cur_time-prev_time << " (" << camera.pos.x << " " << camera.pos.y << " " << camera.pos.z << ") " << camera.pitch << " " << camera.yaw << "\n";
 
         prev_time = cur_time;
     }

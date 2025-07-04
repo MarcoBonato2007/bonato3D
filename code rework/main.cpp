@@ -30,14 +30,14 @@ Shader shader;
 
 // vertices and indices for a cube
 GLfloat vertices[] = { // 3 vals for position, then 4 vals (RGBA) for color
-    -0.5f, 0.5f, -5.0f,   1.0f, 0.0f, 0.0f, 1.0f,
-    0.5f, 0.5f, -5.0f,   0.0f, 1.0f, 0.0f, 1.0f,
-    0.5f, -0.5f, -5.0f,   0.0f, 0.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -5.0f,  0.9f, 0.3f, 0.7f, 1.0f,
-    -0.5f, 0.5f, -6.0f,   0.46f, 0.2f, 0.8f, 1.0f,
-    0.5f, 0.5f, -6.0f,   0.67f, 0.69f, 0.4f, 1.0f,
-    0.5f, -0.5f, -6.0f,   0.84f, 0.20f, 0.14f, 1.0f,
-    -0.5f, -0.5f, -6.0f,  0.48f, 0.27f, 0.84f, 1.0f,
+    -0.5f, 0.5f, -5.0f, -1, 1, 1,
+    0.5f, 0.5f, -5.0f, 1, 1, 1,
+    0.5f, -0.5f, -5.0f, 1, -1, 1,
+    -0.5f, -0.5f, -5.0f, -1, -1, 1,
+    -0.5f, 0.5f, -6.0f, -1, 1, -1,
+    0.5f, 0.5f, -6.0f, 1, 1, -1,
+    0.5f, -0.5f, -6.0f, 1, -1, -1,
+    -0.5f, -0.5f, -6.0f, -1, -1, -1,
 };
 GLuint indices[] = { // Specifies the triangles to draw using indices from the vertices given
     2, 1, 0,
@@ -54,7 +54,7 @@ GLuint indices[] = { // Specifies the triangles to draw using indices from the v
     2, 7, 6
 };  
 
-GLuint specify_vertices() {
+GLuint specify_cube_vertices() {
     // A buffer holds a piece of GPU memory.
     // A VBO (Vertex Buffer Object) holds vertex info (e.g. position, color, tex coords, etc.)
     // An EBO (Element Buffer Object) holds indices of vertices to draw the triangles with
@@ -83,8 +83,8 @@ GLuint specify_vertices() {
             // is normalized?
             // stride (i.e. vertex data repeats every ... bytes)
             // pointer to first piece of data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7*sizeof(GLfloat), (void*) 0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7*sizeof(GLfloat), (void*) (3*sizeof(GLfloat)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*) 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*) (3*sizeof(GLfloat)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     // Now all the initialization for our buffers and arrays is done!
@@ -110,7 +110,9 @@ int main() { // contains some initializations and main loop
 
     camera = Camera(PI/2, (float)(1920)/(1080), 0.1, 100, 5);
     shader = Shader("shaders/vert_shader.vert", "shaders/frag_shader.frag");
-    GLuint VAO = specify_vertices();
+
+    GLuint cube_VAO = specify_cube_vertices();
+    GLuint light_VAO = specify_cube_vertices();
 
     double cursor_x, cursor_y;
     double prev_cursor_x, prev_cursor_y;
@@ -120,16 +122,45 @@ int main() { // contains some initializations and main loop
     float cur_time = 0;
     float prev_time = 0;
 
+    glm::vec3 light_pos = {-5, 5, -12};
+    glm::vec3 cube_color = {1.0, 0.5, 0.31};
+    glm::vec3 light_color = {1.0, 1.0, 1.0};
+    float ambient_strength = 0.1;
+    float specular_strength = 1.0;
+
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUniformMatrix4fv(shader.look_at_location, 1, GL_FALSE, &camera.get_look_at()[0][0]);
         glUniformMatrix4fv(shader.projection_location, 1, GL_FALSE, &camera.projection[0][0]);
+        glUniform3fv(glGetUniformLocation(shader.ID, "light_color"), 1, &light_color[0]);
+        glUniform3fv(glGetUniformLocation(shader.ID, "light_pos"), 1, &light_pos[0]);
+        glUniform3fv(glGetUniformLocation(shader.ID, "camera_pos"), 1, &glm::vec3(camera.pos)[0]);
+        glUniform1f(glGetUniformLocation(shader.ID, "specular_strength"), specular_strength);
+        
+        // Draw colored cube
+        glUniformMatrix4fv(shader.look_at_location, 1, GL_FALSE, &camera.get_look_at()[0][0]);
+        glUniform3fv(glGetUniformLocation(shader.ID, "cube_color"), 1, &cube_color[0]);
+        glUniform1f(glGetUniformLocation(shader.ID, "ambient_strength"), ambient_strength);
         shader.execute();
-        glBindVertexArray(VAO);
+        glBindVertexArray(cube_VAO);
         glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, 0);
-
+        
+        // Draw the light cube
+        glm::vec4 prev_pos = camera.pos;
+        camera.pos += glm::vec4(0.0, 0.0, -5.5, 1.0) - glm::vec4(light_pos, 0.0); // sub cube pos and light pos
+        float prev_ambient = ambient_strength;
+        ambient_strength = 1; // ensure light source is colored white
+        glUniformMatrix4fv(shader.look_at_location, 1, GL_FALSE, &camera.get_look_at()[0][0]);
+        glUniform3fv(glGetUniformLocation(shader.ID, "cube_color"), 1, &light_color[0]);
+        glUniform1f(glGetUniformLocation(shader.ID, "ambient_strength"), ambient_strength);
+        shader.execute();
+        glBindVertexArray(light_VAO);
+        glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, 0);
+        camera.pos = prev_pos;
+        ambient_strength = prev_ambient;
+        
+        // Do background processing
         glfwPollEvents(); // Processes events like drawing objects to screen
         glfwSwapBuffers(window); // front buffer contains current image, back buffer next frame.
 
@@ -150,6 +181,9 @@ int main() { // contains some initializations and main loop
     return 0;
 }
 
+
+// TODO: Get specular lighting to actually work
+// TODO: go through lighting section of tutorial
 // TODO: Import external mesh
 // TODO: Import multiple until it lags
 // TODO: Work on optimizations a bunch

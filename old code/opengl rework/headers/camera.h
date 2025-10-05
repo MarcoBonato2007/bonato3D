@@ -19,9 +19,10 @@ struct Camera {
     glm::vec4 pos = {0, 0, 0, 1};
     float rotation_speed = 1.0;
 
-    // underscores are used for parameters.
+    // trailing underscores are used for parameters.
 
     Camera() {}
+
     Camera(float fov_, float aspect_ratio_, float near_, float far_, float speed_) {
         fov = fov_;
         aspect_ratio = aspect_ratio_;

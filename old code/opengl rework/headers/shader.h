@@ -6,7 +6,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-
+// TODO: Look through, understand, redo
 struct Shader {
     GLuint ID;
     GLuint look_at_location;

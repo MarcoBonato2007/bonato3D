@@ -1,5 +1,3 @@
-// Forgive the insane amount of comments. It's difficult to remember how all this works.
-
 // Import order is important.
 #include <glad/glad.h> // loads in opengl pointers, saving a bunch of time
 #include "lib_files/glad.c"
@@ -12,6 +10,7 @@
 
 #include "headers/camera.h"
 #include "headers/shader.h"
+#include "headers/model.h"
 
 // Pipeline (excl. tesselation, geometry shader):
     // 1. Specifying vertices (e.g. putting vertex data in buffers)
@@ -92,7 +91,7 @@ GLuint specify_cube_vertices() {
     return VAO;
 }
 
-int main() { // contains some initializations and main loop
+int main() {
     // Initialization of the GLFW window, plus some input modifications
     glfwInit();
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -112,7 +111,6 @@ int main() { // contains some initializations and main loop
     shader = Shader("shaders/vert_shader.vert", "shaders/frag_shader.frag");
 
     GLuint cube_VAO = specify_cube_vertices();
-    GLuint light_VAO = specify_cube_vertices();
 
     double cursor_x, cursor_y;
     double prev_cursor_x, prev_cursor_y;
@@ -122,43 +120,18 @@ int main() { // contains some initializations and main loop
     float cur_time = 0;
     float prev_time = 0;
 
-    glm::vec3 light_pos = {-5, 5, -12};
-    glm::vec3 cube_color = {1.0, 0.5, 0.31};
-    glm::vec3 light_color = {1.0, 1.0, 1.0};
-    float ambient_strength = 0.1;
-    float specular_strength = 1.0;
-
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // set the uniform values (projection matrix and lookat matrix)
         glUniformMatrix4fv(shader.projection_location, 1, GL_FALSE, &camera.projection[0][0]);
-        glUniform3fv(glGetUniformLocation(shader.ID, "light_color"), 1, &light_color[0]);
-        glUniform3fv(glGetUniformLocation(shader.ID, "light_pos"), 1, &light_pos[0]);
-        glUniform3fv(glGetUniformLocation(shader.ID, "camera_pos"), 1, &glm::vec3(camera.pos)[0]);
-        glUniform1f(glGetUniformLocation(shader.ID, "specular_strength"), specular_strength);
-        
-        // Draw colored cube
         glUniformMatrix4fv(shader.look_at_location, 1, GL_FALSE, &camera.get_look_at()[0][0]);
-        glUniform3fv(glGetUniformLocation(shader.ID, "cube_color"), 1, &cube_color[0]);
-        glUniform1f(glGetUniformLocation(shader.ID, "ambient_strength"), ambient_strength);
+
+        // execute shader and draw the cube
         shader.execute();
         glBindVertexArray(cube_VAO);
         glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, 0);
-        
-        // Draw the light cube
-        glm::vec4 prev_pos = camera.pos;
-        camera.pos += glm::vec4(0.0, 0.0, -5.5, 1.0) - glm::vec4(light_pos, 0.0); // sub cube pos and light pos
-        float prev_ambient = ambient_strength;
-        ambient_strength = 1; // ensure light source is colored white
-        glUniformMatrix4fv(shader.look_at_location, 1, GL_FALSE, &camera.get_look_at()[0][0]);
-        glUniform3fv(glGetUniformLocation(shader.ID, "cube_color"), 1, &light_color[0]);
-        glUniform1f(glGetUniformLocation(shader.ID, "ambient_strength"), ambient_strength);
-        shader.execute();
-        glBindVertexArray(light_VAO);
-        glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, 0);
-        camera.pos = prev_pos;
-        ambient_strength = prev_ambient;
         
         // Do background processing
         glfwPollEvents(); // Processes events like drawing objects to screen
@@ -182,8 +155,6 @@ int main() { // contains some initializations and main loop
 }
 
 
-// TODO: Get specular lighting to actually work
-// TODO: go through lighting section of tutorial
-// TODO: Import external mesh
+// TODO: Import external mesh, make textures all work
 // TODO: Import multiple until it lags
 // TODO: Work on optimizations a bunch

@@ -1,22 +1,34 @@
-#include <GLFW/glfw3.h> // used to open windows, take input, etc.
-
+#include <GLFW/glfw3.h>
 #include <vector>
+
+#include "headers/buffers.h"
 
 int main() {
     glfwInit();
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Pixels", nullptr, nullptr);
+
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    width = mode -> width; // available globally in buffers.h
+    height = mode -> height;
+    GLFWwindow* window = glfwCreateWindow(width, height, "Engine", monitor, NULL);
     glfwMakeContextCurrent(window);
 
-    std::vector<uint32_t> framebuffer(800*600);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // hides cursor
+    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE); // means we get precise input data
+
+    framebuffer = std::vector<uint32_t>(width*height); // see buffers.h
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        // Fill framebuffer manually
-        for (int y=0; y<600; ++y)
-            for (int x=0; x<800; ++x)
-                framebuffer[y*800 + x] = 0xFF0000FF; // Red pixels (RGBA)
+        // temporary example drawing
+        for (int x=0; x<width; x++) {
+            for (int y=0; y<height; y++) {
+                set_pixel(x, y, 0xFF0000FF); // red opaque color
+            }
+        }
 
-        glDrawPixels(800, 600, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer.data());
+        glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer.data());
+        // keyboard handling to go here in future
         glfwSwapBuffers(window);
     }
     

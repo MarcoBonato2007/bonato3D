@@ -1,9 +1,28 @@
 #include <GLFW/glfw3.h>
+
 #include <vector>
+#include <iostream>
 
-#include "headers/buffers.h"
+#include "headers/model.h"
+#include "headers/drawing.h"
 
-int main() {
+void mainLoop(GLFWwindow* window) {
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+
+        draw(); // this is the core of the program. check drawing.h
+
+        glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, frame_buffer.data());
+
+        // keyboard handling to go here in future
+
+        glfwSwapBuffers(window);
+    }
+    
+    glfwTerminate();
+}
+
+void init(std::string pathToModel) {
     glfwInit();
 
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -16,21 +35,26 @@ int main() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // hides cursor
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE); // means we get precise input data
 
-    framebuffer = std::vector<uint32_t>(width*height); // see buffers.h
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+    frame_buffer = std::vector<uint32_t>(width*height); // see buffers.h
+    depth_buffer = std::vector<uint32_t>(width*height);
 
-        // temporary example drawing
-        for (int x=0; x<width; x++) {
-            for (int y=0; y<height; y++) {
-                set_pixel(x, y, 0xFF0000FF); // red opaque color
-            }
-        }
+    model = Model(pathToModel); // see model.h
 
-        glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer.data());
-        // keyboard handling to go here in future
-        glfwSwapBuffers(window);
-    }
-    
-    glfwTerminate();
+    mainLoop(window);
 }
+
+int main(int argc, char *argv[]) {
+    std::string pathToModel = "";
+    if (argc != 1) {
+        std::cout << "Must enter an argument: the path to the file you want to display" << std::endl;
+        return -1;
+    }
+    else {
+        pathToModel = argv[0];
+    }
+
+    init(pathToModel);
+}
+
+// main is responsible for initializing glfw and starting a mainloop
+// all glfw and opengl code is contained purely inside here.

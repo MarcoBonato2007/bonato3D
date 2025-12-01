@@ -1,1 +1,0 @@
-glm::dot(triangle.vert1, triangle.normal) < triangle.vert1.w*triangle.normal.w

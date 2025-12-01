@@ -46,7 +46,7 @@ void init(std::string pathToModel) {
 int main(int argc, char *argv[]) {
     std::string pathToModel = "";
     if (argc != 1) {
-        std::cout << "Must enter an argument: the path to the file you want to display" << std::endl;
+        std::cout << "Must enter a single argument: the path to the file you want to display" << std::endl;
         return -1;
     }
     else {

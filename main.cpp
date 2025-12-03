@@ -22,6 +22,10 @@ void mainLoop(GLFWwindow* window) {
     glfwTerminate();
 }
 
+void printInfo() {
+    std::cout << "Width: " << width << ", " << "height: " << height << "\n";
+}
+
 void init(std::string pathToModel) {
     glfwInit();
 
@@ -38,7 +42,10 @@ void init(std::string pathToModel) {
     frame_buffer = std::vector<uint32_t>(width*height); // see buffers.h
     depth_buffer = std::vector<uint32_t>(width*height);
 
-    model = Model(pathToModel); // see model.h
+    // model = Model(pathToModel); // see model.h
+    model = Model();
+    
+    printInfo();
 
     mainLoop(window);
 }
@@ -47,7 +54,7 @@ int main(int argc, char *argv[]) {
     std::string pathToModel = "";
     if (argc != 1) {
         std::cout << "Must enter a single argument: the path to the file you want to display" << std::endl;
-        return -1;
+        return 1;
     }
     else {
         pathToModel = argv[0];

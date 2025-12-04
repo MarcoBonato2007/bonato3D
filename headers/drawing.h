@@ -2,6 +2,11 @@
 #define DRAWING_H
 
 #include <iostream>
+
+#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
+#include <glm/mat2x2.hpp>
+
 #include "model.h"
 
 uint32_t width, height;
@@ -12,17 +17,21 @@ void setPixel(uint32_t x, uint32_t y, uint32_t color) {
     frame_buffer[x + y*width] = color;
 }
 
-// checks if (a, b) is to the left of line from (x1, y1) to (x2, y2)
+int getDepth(uint32_t x, uint32_t y) {
+    return depth_buffer[x + y*width];
+}
+
+// checks if the point c is to the left of line from a to b
 // takes into account the top left rule
-bool isLeft(int x1, int y1, int x2, int y2, int a, int b) {
+bool isLeft(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
+    glm::vec2 ab = b-a;
+    glm::vec2 ac = c-a;
+
     // res is > 0 if (a, b) is left, = 0 if on, and < 0 if right of the line
-    // derived via a determinant (factor of -1 due to flipped y axis)
-    int dx = x2-x1;
-    int dy = y2-y1;
-    int res = (a-x1)*dy - (b-y1)*dx;
+    int res = - glm::determinant(glm::mat2(ab, ac)); // minus sign due to flipped y axis
 
     // If this is a left or top edge we want to exclude when res = 0 (top left rule)
-    if ((dy == 0 && dx < 0) || (dy > 0)) {
+    if ((ab[1] == 0 && ab[0] < 0) || (ab[1] > 0)) {
         return (res > 0);
     }
     else {
@@ -31,19 +40,16 @@ bool isLeft(int x1, int y1, int x2, int y2, int a, int b) {
 }
 
 // Triangle vertices must be counterclockwise
-void triangle(uint32_t color, int x1, int y1, int x2, int y2, int x3, int y3) {
-    int x_min = std::min(x3, std::min(x1, x2));
-    int x_max = std::max(x3, std::max(x1, x2));
-    int y_min = std::min(y3, std::min(y1, y2));
-    int y_max = std::max(y3, std::max(y1, y2));
+void drawTriangle(uint32_t color, glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) {
+    // bottom-left and top-right coordinates of triangle bounding box
+    glm::vec2 bl = glm::min(v1, glm::min(v2, v3));
+    glm::vec2 tr = glm::max(v1, glm::max(v2, v3));
 
-    for (int x=x_min; x<=x_max; x++) {
-        for (int y=y_min; y<=y_max; y++) {
-            bool a = isLeft(x1, y1, x2, y2, x, y);
-            bool b = isLeft(x2, y2, x3, y3, x, y);
-            bool c = isLeft(x3, y3, x1, y1, x, y);
-
-            if (a && b && c) {
+    for (int x=bl[0]; x<=tr[0]; x++) {
+        for (int y=bl[1]; y<=tr[1]; y++) {
+            glm::vec2 pos = {x, y};
+            
+            if (isLeft(v1, v2, pos) && isLeft(v2, v3, pos) && isLeft(v3, v1, pos)) {
                 setPixel(x, y, 0xFFFFFF);
             }
         }
@@ -57,7 +63,7 @@ void triangle(uint32_t color, int x1, int y1, int x2, int y2, int x3, int y3) {
 
 // Sets the framebuffer. This is the core of the program.
 void draw() {
-    triangle(0xFFFFFF, 100, height-100, width-200, 200, 100, 100);
+    drawTriangle(0xFFFFFF, {100, height-100}, {width-200, 200}, {100, 100});
 }
 
 #endif

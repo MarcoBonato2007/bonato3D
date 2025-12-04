@@ -23,7 +23,7 @@ void mainLoop(GLFWwindow* window) {
 }
 
 void printInfo() {
-    std::cout << "Width: " << width << ", " << "height: " << height << "\n";
+    std::cout << "Width: " << width << "\n" << "Height: " << height << std::endl;
 }
 
 void init(std::string pathToModel) {

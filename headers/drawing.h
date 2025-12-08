@@ -11,7 +11,7 @@
 
 uint32_t width, height;
 std::vector<uint32_t> frame_buffer; // 32-bit RGBA
-std::vector<uint32_t> depth_buffer;
+std::vector<float> depth_buffer;
 
 void setPixel(uint32_t x, uint32_t y, uint32_t color) {
     frame_buffer[x + y*width] = color;
@@ -21,6 +21,10 @@ int getDepth(uint32_t x, uint32_t y) {
     return depth_buffer[x + y*width];
 }
 
+void setDepth(uint32_t x, uint32_t y, float new_depth) {
+    depth_buffer[x + y*width] = new_depth;
+}
+
 // checks if the point c is to the left of line from a to b
 // takes into account the top left rule
 bool isLeft(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
@@ -28,7 +32,7 @@ bool isLeft(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
     glm::vec2 ac = c-a;
 
     // res is > 0 if (a, b) is left, = 0 if on, and < 0 if right of the line
-    int res = - glm::determinant(glm::mat2(ab, ac)); // minus sign due to flipped y axis
+    float res = glm::determinant(glm::mat2(ab, ac)); // minus sign due to flipped y axis
 
     // If this is a left or top edge we want to exclude when res = 0 (top left rule)
     if ((ab[1] == 0 && ab[0] < 0) || (ab[1] > 0)) {
@@ -40,30 +44,51 @@ bool isLeft(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
 }
 
 // Triangle vertices must be counterclockwise
-void drawTriangle(uint32_t color, glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) {
+// Each vector is x and y screen (pixel) coordinates along with a normalized [-1, 1] depth (z-value)
+// Note: do NOT floor v1, v2, or v3
+void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     // bottom-left and top-right coordinates of triangle bounding box
-    glm::vec2 bl = glm::min(v1, glm::min(v2, v3));
-    glm::vec2 tr = glm::max(v1, glm::max(v2, v3));
+    glm::vec2 bl = glm::floor(glm::min(v1, glm::min(v2, v3)));
+    glm::vec2 tr = glm::ceil(glm::max(v1, glm::max(v2, v3)));
 
-    for (int x=bl[0]; x<=tr[0]; x++) {
-        for (int y=bl[1]; y<=tr[1]; y++) {
-            glm::vec2 pos = {x, y};
-            
-            if (isLeft(v1, v2, pos) && isLeft(v2, v3, pos) && isLeft(v3, v1, pos)) {
-                setPixel(x, y, 0xFFFFFF);
-            }
-        }
+    glm::vec3 normal = glm::cross(v2-v1, v3-v1);
+
+    glm::vec3 bottom; // bottom most vertex
+    if (v1.y == bl.y) {
+        bottom = v1;
+    }
+    else if (v2.y == bl.y) {
+        bottom = v2;
+    }
+    else {
+        bottom = v3;
     }
 
-    // TODO: add implementation with z-buffer
-        // How to get z value for each pixel??
+    // start with depth of top left pixel of bounding box
+    float cur_depth = bottom.z - ((bl.x+0.5-bottom.x)*normal.x + (bl.y+0.5-bottom.y)*normal.y)/normal.z;
 
-    // TODO: think about how to draw overlapping triangles
+    for (int x=bl.x; x<=tr.x; x++) {
+        float start_row_depth = cur_depth;
+
+        for (int y=bl.y; y<=tr.y; y++) {
+            glm::vec2 pos = {x+0.5f, y+0.5f};
+            if (isLeft(v1, v2, pos) && isLeft(v2, v3, pos) && isLeft(v3, v1, pos) && cur_depth > getDepth(x, y)) {
+                setPixel(x, y, color);
+                setDepth(x, y, cur_depth);
+            }
+            cur_depth -= normal.y/normal.z;
+        }
+
+        start_row_depth = start_row_depth - normal.x/normal.z;
+        cur_depth = start_row_depth;
+    }
+
 }
 
 // Sets the framebuffer. This is the core of the program.
 void draw() {
-    drawTriangle(0xFFFFFF, {100, height-100}, {width-200, 200}, {100, 100});
+    drawTriangle(0xFFFFFF, {500, 500, 0.5}, {1000, 1000, 0.5}, {500, 1000, -0.5});
+    drawTriangle(0xFF0000, {500, 500, -0.5}, {1000, 1000, -0.5}, {500, 1000, 0.5});
 }
 
 #endif

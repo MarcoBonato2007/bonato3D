@@ -9,8 +9,8 @@
 void mainLoop(GLFWwindow* window) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-
-        draw(); // this is the core of the program. check drawing.h
+        
+        draw();
 
         glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, frame_buffer.data());
 
@@ -40,7 +40,8 @@ void init(std::string pathToModel) {
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE); // means we get precise input data
 
     frame_buffer = std::vector<uint32_t>(width*height); // see buffers.h
-    depth_buffer = std::vector<uint32_t>(width*height);
+    depth_buffer = std::vector<float>(width*height);
+    std::fill(depth_buffer.begin(), depth_buffer.end(), -1);
 
     // model = Model(pathToModel); // see model.h
     model = Model();
@@ -65,3 +66,12 @@ int main(int argc, char *argv[]) {
 
 // main is responsible for initializing glfw and starting a mainloop
 // all glfw and opengl code is contained purely inside here.
+
+// TODO:
+    // Just get basic 3d drawing and projection done
+    // Then add more meshes / complicated stuff until it's slow.
+    // Then work on basic optimizations:
+        // automatically exclude backface triangles from drawing
+        // Frustum culling
+            // Check bounding boxes in world spaces
+            // Check triangles in clip spaces

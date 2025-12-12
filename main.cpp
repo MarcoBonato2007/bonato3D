@@ -6,6 +6,10 @@
 #include "headers/model.h"
 #include "headers/drawing.h"
 
+static void err_cb(int error, const char* desc) {
+    printf("GLFW error: %d: %s\n", error, desc);
+}
+
 void mainLoop(GLFWwindow* window) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -28,6 +32,7 @@ void printInfo() {
 
 void init(std::string pathToModel) {
     glfwInit();
+    glfwSetErrorCallback(err_cb);
 
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -43,8 +48,7 @@ void init(std::string pathToModel) {
     depth_buffer = std::vector<float>(width*height);
     std::fill(depth_buffer.begin(), depth_buffer.end(), -1);
 
-    // model = Model(pathToModel); // see model.h
-    model = Model();
+    model = Model(pathToModel); // see model.h
     
     printInfo();
 
@@ -53,12 +57,12 @@ void init(std::string pathToModel) {
 
 int main(int argc, char *argv[]) {
     std::string pathToModel = "";
-    if (argc != 1) {
+    if (argc == 1) {
         std::cout << "Must enter a single argument: the path to the file you want to display" << std::endl;
         return 1;
     }
     else {
-        pathToModel = argv[0];
+        pathToModel = argv[1];
     }
 
     init(pathToModel);

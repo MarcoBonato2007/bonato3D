@@ -4,10 +4,6 @@
 #include <iostream>
 
 #include <glm/glm.hpp>
-#include <glm/vec2.hpp>
-#include <glm/mat2x2.hpp>
-
-#include "model.h"
 
 uint32_t width, height;
 std::vector<uint32_t> frame_buffer; // 32-bit RGBA

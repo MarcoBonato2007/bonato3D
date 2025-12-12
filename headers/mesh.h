@@ -1,17 +1,25 @@
 #ifndef MESH_H
 #define MESH_H
 
-struct Mesh {
-    int numVertices, numFaces, numIndices;
-    aiVector3D *vertices;
-    aiFace *faces;
+#include <glm/glm.hpp>
 
-    Mesh(unsigned int pNumVertices, unsigned int pNumFaces, unsigned int pNumIndices, aiVector3D *pVertices, aiFace *pFaces) {
-        numVertices = pNumVertices;
-        numFaces = pNumFaces;
-        numIndices = pNumIndices;
-        vertices = pVertices;
-        faces = pFaces;
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec3 normal;
+
+    Vertex(glm::vec3 pos, glm::vec3 normal) {
+        this->pos = pos;
+        this->normal = normal;
+    }
+};
+
+struct Mesh {
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
+        this->vertices = vertices;
+        this->indices = indices;
     };
 };
 

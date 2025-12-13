@@ -81,10 +81,4 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
 
 }
 
-// Sets the framebuffer. This is the core of the program.
-void draw() {
-    drawTriangle(0xFFFFFF, {500, 500, 0.5}, {1000, 1000, 0.5}, {500, 1000, -0.5});
-    drawTriangle(0xFF0000, {500, 500, -0.5}, {1000, 1000, -0.5}, {500, 1000, 0.5});
-}
-
 #endif

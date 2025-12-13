@@ -3,15 +3,32 @@
 
 #include <glm/glm.hpp>
 
+#include "matrices.h"
+#include "player.h"
+
 struct Vertex {
     glm::vec3 pos;
-    glm::vec3 normal;
+    // glm::vec3 normal;
 
-    Vertex(glm::vec3 pos, glm::vec3 normal) {
+    Vertex(glm::vec3 pos) { // glm::vec3 normal
         this->pos = pos;
-        this->normal = normal;
+        // this->normal = normal;
     }
 };
+
+void printVert3(glm::vec3 v) {
+    std::cout << v.x << " " << v.y << " " << v.z << std::endl;
+}
+
+void printVert4(glm::vec4 v) {
+    std::cout << v.x << " " << v.y << " " << v.z << " " << v.w << std::endl;
+}
+
+void printMat4(glm::mat4 m) {
+    for (int i=0; i<4; i++) {
+        printVert4(m[i]);
+    }
+}
 
 struct Mesh {
     std::vector<Vertex> vertices;
@@ -21,6 +38,28 @@ struct Mesh {
         this->vertices = vertices;
         this->indices = indices;
     };
+
+    void draw() {
+        std::vector<glm::vec3> screen_verts = {};
+        for (Vertex v: vertices) {
+            v.pos.x += 2;
+            glm::vec4 v_proj = proj*get_look_at(pos, pitch, yaw)*glm::vec4(v.pos, 1.0);
+            glm::vec3 v_perspdiv = glm::vec3(v_proj/v_proj.w);
+            glm::vec3 v_screen = glm::vec3(width*(v_perspdiv.x+1)/2, height*(v_perspdiv.y+1)/2, v_perspdiv.z);
+            screen_verts.push_back(v_screen);
+        }
+        for (int i=0; i<indices.size(); i+=3) {
+            glm::vec3 v1 = screen_verts[indices[i]];
+            glm::vec3 v2 = screen_verts[indices[i+1]];
+            glm::vec3 v3 = screen_verts[indices[i+2]];
+            if ((v1.z > 1 || v1.z < -1) && (v3.z > 1 || v3.z < -1) && (v3.z > 1 || v3.z < -1)) {
+                continue;
+            }
+
+            drawTriangle(0xFFFFFF, screen_verts[indices[i]], screen_verts[indices[i+1]], screen_verts[indices[i+2]]);
+        }
+
+    }
 };
 
 #endif

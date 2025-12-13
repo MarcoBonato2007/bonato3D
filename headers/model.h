@@ -12,7 +12,34 @@
 struct Model {
     std::vector<Mesh> meshes;
 
-    Model() {}
+    Model() { // standard cube model
+        meshes = {Mesh(
+            {
+                Vertex({-0.5f, 0.5f, -5.0f}),
+                Vertex({0.5f, 0.5f, -5.0f}),
+                Vertex({0.5f, -0.5f, -5.0f}),
+                Vertex({-0.5f, -0.5f, -5.0f}),
+                Vertex({-0.5f, 0.5f, -6.0f}),
+                Vertex({0.5f, 0.5f, -6.0f}),
+                Vertex({0.5f, -0.5f, -6.0f}),
+                Vertex({-0.5f, -0.5f, -6.0f})
+            }, 
+            {
+                2, 1, 0,
+                2, 0, 3,
+                6, 4, 5,
+                6, 7, 4,
+                3, 0, 4,
+                3, 4, 7,
+                6, 5, 1,
+                6, 1, 2,
+                1, 5, 4, 
+                1, 4, 0,
+                2, 3, 7,
+                2, 7, 6
+            }
+        )};
+    }
     
     Model(std::string pathToModel) {
         Assimp::Importer importer;
@@ -50,8 +77,8 @@ struct Model {
 
         for (int i=0; i<mesh->mNumVertices; i++) {
             glm::vec3 pos = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
-            glm::vec3 normal = {mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z};
-            vertices.push_back(Vertex(pos, normal));
+            // glm::vec3 normal = {mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z};
+            vertices.push_back(Vertex(pos)); // normal
         }
 
         for (int i=0; i<mesh->mNumFaces; i++) {
@@ -64,7 +91,11 @@ struct Model {
         return Mesh(vertices, indices);
     }
 
-    
+    void draw() {
+        for (Mesh m: meshes) {
+            m.draw();
+        }
+    }
 };
 
 Model model; // the main model shared by the whole program

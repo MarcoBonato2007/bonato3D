@@ -5,20 +5,32 @@
 
 #include "headers/model.h"
 #include "headers/drawing.h"
+#include "headers/player.h"
 
 static void err_cb(int error, const char* desc) {
     printf("GLFW error: %d: %s\n", error, desc);
 }
 
 void mainLoop(GLFWwindow* window) {
+    double cursor_x, cursor_y;
+    double prev_cursor_x, prev_cursor_y;
+    glfwGetCursorPos(window, &cursor_x, &cursor_y);
+    glfwGetCursorPos(window, &prev_cursor_x, &prev_cursor_y);
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        
-        draw();
+
+        std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
+
+        model.draw();
 
         glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, frame_buffer.data());
 
-        // keyboard handling to go here in future
+        glfwGetCursorPos(window, &cursor_x, &cursor_y);
+        keyboard_handler(window);
+        mouse_handler(cursor_x-prev_cursor_x, cursor_y-prev_cursor_y);
+        prev_cursor_x = cursor_x;
+        prev_cursor_y = cursor_y;
 
         glfwSwapBuffers(window);
     }
@@ -28,6 +40,7 @@ void mainLoop(GLFWwindow* window) {
 
 void printInfo() {
     std::cout << "Width: " << width << "\n" << "Height: " << height << std::endl;
+    std::cout << "Aspect: " << aspect << std::endl;
 }
 
 void init(std::string pathToModel) {
@@ -38,6 +51,13 @@ void init(std::string pathToModel) {
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     width = mode -> width; // available globally in buffers.h
     height = mode -> height;
+    aspect = (float)width/height;
+    proj = {
+        {1/tan(X_FOV/2), 0, 0, 0}, 
+        {0, aspect/tan(X_FOV/2), 0, 0}, 
+        {0, 0, (near+far)/(near-far), -1}, 
+        {0, 0, (2*near*far)/(near-far), 0}
+    };
     GLFWwindow* window = glfwCreateWindow(width, height, "Engine", monitor, NULL);
     glfwMakeContextCurrent(window);
 
@@ -48,7 +68,8 @@ void init(std::string pathToModel) {
     depth_buffer = std::vector<float>(width*height);
     std::fill(depth_buffer.begin(), depth_buffer.end(), -1);
 
-    model = Model(pathToModel); // see model.h
+    model = Model(); // no path provided -> standard cube model
+    // model = Model(pathToModel); // see model.h
     
     printInfo();
 

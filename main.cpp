@@ -21,6 +21,7 @@ void mainLoop(GLFWwindow* window) {
         glfwPollEvents();
 
         std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
+        std::fill(depth_buffer.begin(), depth_buffer.end(), -1);
 
         model.draw();
 
@@ -66,7 +67,6 @@ void init(std::string pathToModel) {
 
     frame_buffer = std::vector<uint32_t>(width*height); // see buffers.h
     depth_buffer = std::vector<float>(width*height);
-    std::fill(depth_buffer.begin(), depth_buffer.end(), -1);
 
     model = Model(); // no path provided -> standard cube model
     // model = Model(pathToModel); // see model.h
@@ -90,10 +90,11 @@ int main(int argc, char *argv[]) {
 }
 
 // main is responsible for initializing glfw and starting a mainloop
-// all glfw and opengl code is contained purely inside here.
+// all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // Just get basic 3d drawing and projection done
+    // Fix bugs, glitches, etc.
+        // Why is it so slowwwww? (fill() probably has to do with it)
     // Then add more meshes / complicated stuff until it's slow.
     // Then work on basic optimizations:
         // automatically exclude backface triangles from drawing

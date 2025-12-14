@@ -64,11 +64,21 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     float cur_depth = bottom.z - ((bl.x+0.5-bottom.x)*normal.x + (bl.y+0.5-bottom.y)*normal.y)/normal.z;
 
     for (int x=bl.x; x<=tr.x; x++) {
+        if (x < 0 || x >= width) {continue;}
+
         float start_row_depth = cur_depth;
 
         for (int y=bl.y; y<=tr.y; y++) {
+            if (y < 0 || y >= height) {continue;}
+                
             glm::vec2 pos = {x+0.5f, y+0.5f};
-            if (isLeft(v1, v2, pos) && isLeft(v2, v3, pos) && isLeft(v3, v1, pos) && cur_depth > getDepth(x, y)) {
+            if (isLeft(v1, v2, pos) 
+                && isLeft(v2, v3, pos) 
+                && isLeft(v3, v1, pos) 
+                && cur_depth > getDepth(x, y)
+                && cur_depth >= -1
+                && cur_depth <= 1
+            ) {
                 setPixel(x, y, color);
                 setDepth(x, y, cur_depth);
             }

@@ -32,10 +32,10 @@ void keyboard_handler(GLFWwindow* window) {
     glm::vec3 pos_change = {0, 0, 0};
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        pos_change.z += 0.1;
+        pos_change.z -= 0.1;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        pos_change.z -= 0.1;
+        pos_change.z += 0.1;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         pos_change.x += 0.1;

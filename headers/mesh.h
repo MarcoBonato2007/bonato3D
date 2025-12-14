@@ -2,6 +2,8 @@
 #define MESH_H
 
 #include <glm/glm.hpp>
+#include <random>
+#include <ctime>
 
 #include "matrices.h"
 #include "player.h"
@@ -16,35 +18,25 @@ struct Vertex {
     }
 };
 
-void printVert3(glm::vec3 v) {
-    std::cout << v.x << " " << v.y << " " << v.z << std::endl;
-}
-
-void printVert4(glm::vec4 v) {
-    std::cout << v.x << " " << v.y << " " << v.z << " " << v.w << std::endl;
-}
-
-void printMat4(glm::mat4 m) {
-    for (int i=0; i<4; i++) {
-        printVert4(m[i]);
-    }
-}
-
 struct Mesh {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    std::vector<uint32_t> colors; // randomly assigned
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
         this->vertices = vertices;
         this->indices = indices;
+        colors = std::vector<uint32_t>(indices.size()/3);
+        std::srand(unsigned(std::time(nullptr)));
+        std::generate(colors.begin(), colors.end(), rand);
     };
 
     void draw() {
         std::vector<glm::vec3> screen_verts = {};
         for (Vertex v: vertices) {
-            v.pos.x += 2;
-            glm::vec4 v_proj = proj*get_look_at(pos, pitch, yaw)*glm::vec4(v.pos, 1.0);
+            glm::vec4 v_proj = proj*get_look_at(pos, pitch, yaw)*glm::vec4(v.pos, 1.0); // get_look_at(pos, pitch, yaw)
             glm::vec3 v_perspdiv = glm::vec3(v_proj/v_proj.w);
+            // Should you do the conversion to screen coords directly inside the projection?
             glm::vec3 v_screen = glm::vec3(width*(v_perspdiv.x+1)/2, height*(v_perspdiv.y+1)/2, v_perspdiv.z);
             screen_verts.push_back(v_screen);
         }
@@ -52,11 +44,10 @@ struct Mesh {
             glm::vec3 v1 = screen_verts[indices[i]];
             glm::vec3 v2 = screen_verts[indices[i+1]];
             glm::vec3 v3 = screen_verts[indices[i+2]];
-            if ((v1.z > 1 || v1.z < -1) && (v3.z > 1 || v3.z < -1) && (v3.z > 1 || v3.z < -1)) {
-                continue;
-            }
 
-            drawTriangle(0xFFFFFF, screen_verts[indices[i]], screen_verts[indices[i+1]], screen_verts[indices[i+2]]);
+            // Do clipping into more triangles if vertices are off screen?
+
+            drawTriangle(colors[i/3], screen_verts[indices[i]], screen_verts[indices[i+1]], screen_verts[indices[i+2]]);
         }
 
     }

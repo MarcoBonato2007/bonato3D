@@ -15,14 +15,14 @@ struct Model {
     Model() { // standard cube model
         meshes = {Mesh(
             {
-                Vertex({-0.5f, 0.5f, -5.0f}),
-                Vertex({0.5f, 0.5f, -5.0f}),
-                Vertex({0.5f, -0.5f, -5.0f}),
-                Vertex({-0.5f, -0.5f, -5.0f}),
-                Vertex({-0.5f, 0.5f, -6.0f}),
-                Vertex({0.5f, 0.5f, -6.0f}),
-                Vertex({0.5f, -0.5f, -6.0f}),
-                Vertex({-0.5f, -0.5f, -6.0f})
+                Vertex({-0.5f, 0.5f, -2.0f}),
+                Vertex({0.5f, 0.5f, -2.0f}),
+                Vertex({0.5f, -0.5f, -2.0f}),
+                Vertex({-0.5f, -0.5f, -2.0f}),
+                Vertex({-0.5f, 0.5f, -3.0f}),
+                Vertex({0.5f, 0.5f, -3.0f}),
+                Vertex({0.5f, -0.5f, -3.0f}),
+                Vertex({-0.5f, -0.5f, -3.0f})
             }, 
             {
                 2, 1, 0,

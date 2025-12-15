@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <chrono>
 
 #include "headers/model.h"
 #include "headers/drawing.h"
@@ -17,14 +18,17 @@ void mainLoop(GLFWwindow* window) {
     glfwGetCursorPos(window, &cursor_x, &cursor_y);
     glfwGetCursorPos(window, &prev_cursor_x, &prev_cursor_y);
 
+    auto start = std::chrono::system_clock::now();
+    int n = 0;
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
         look_at = get_look_at(pos, pitch, yaw);
         mvp = proj*look_at;
 
-        frame_buffer = std::vector<uint32_t>(width*height, 0);
-        depth_buffer = std::vector<float>(width*height, -1);
+        std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
+        std::fill(depth_buffer.begin(), depth_buffer.end(), -1.0f);
 
         model.draw();
 
@@ -37,7 +41,14 @@ void mainLoop(GLFWwindow* window) {
         prev_cursor_y = cursor_y;
 
         glfwSwapBuffers(window);
+
+        n++;
     }
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+    std::cout << (float)n/elapsed_seconds.count() << std::endl;
     
     glfwTerminate();
 }
@@ -51,10 +62,12 @@ void init(std::string pathToModel) {
     glfwInit();
     glfwSetErrorCallback(err_cb);
 
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    width = mode -> width; // available globally in buffers.h
-    height = mode -> height;
+    // GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    // const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    // width = mode -> width; // available globally in buffers.h
+    // height = mode -> height;
+    width = 800;
+    height = 600;
     aspect = (float)width/height;
     proj = {
         {1/tan(X_FOV/2), 0, 0, 0}, 
@@ -62,7 +75,7 @@ void init(std::string pathToModel) {
         {0, 0, (near+far)/(near-far), -1}, 
         {0, 0, (2*near*far)/(near-far), 0}
     };
-    GLFWwindow* window = glfwCreateWindow(width, height, "Engine", monitor, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Engine", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // hides cursor
@@ -96,8 +109,15 @@ int main(int argc, char *argv[]) {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // Speed it up!
-        // Backface cull
+    // write a profiler that outputs average number of draws per second
+
+    // Save your progress
+    // Try to rewrite in SDL (easy since all opengl code is inside main.cpp)
+    // Is it faster? good, keep it. Otherwise keep opengl.
+    // Now try to remove all the glm use, and optimize math (barycentric interpolate depth and the left-ness thing)
+    // Is it faster? good, keep it. Otherwise keep glm.
+    // Now 
+
     // Then add more meshes / complicated stuff until it's slow.
     // Then work on basic optimizations:
         // automatically exclude backface triangles from drawing

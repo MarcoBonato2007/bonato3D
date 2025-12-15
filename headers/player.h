@@ -28,25 +28,25 @@ void mouse_handler(double dx, double dy) {
     yaw += yaw_change; // * rotation speed
 }
 
-void keyboard_handler(auto ev) {
+void keyboard_handler(GLFWwindow* window) {
     glm::vec3 pos_change = {0, 0, 0};
 
-    if (ev.key.keysym.sym == SDLK_w) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         pos_change.z -= 0.1;
     }
-    if (ev.key.keysym.sym == SDLK_s) {
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         pos_change.z += 0.1;
     }
-    if (ev.key.keysym.sym == SDLK_d) {
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         pos_change.x += 0.1;
     }
-    if (ev.key.keysym.sym == SDLK_a) {
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         pos_change.x -= 0.1;
     }
-    if (ev.key.keysym.sym == SDLK_UP) {
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         pos_change.y += 0.1;
     }
-    if (ev.key.keysym.sym == SDLK_DOWN) {
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         pos_change.y -= 0.1;
     }
 

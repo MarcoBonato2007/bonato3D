@@ -60,8 +60,10 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
         bottom = v3;
     }
 
+    float x_increm = -normal.x/normal.z;
+    float y_increm = -normal.y/normal.z;
     // start with depth of top left pixel of bounding box
-    float cur_depth = bottom.z - ((bl.x+0.5-bottom.x)*normal.x + (bl.y+0.5-bottom.y)*normal.y)/normal.z;
+    float cur_depth = bottom.z + (bl.x+0.5-bottom.x)*x_increm + (bl.y+0.5-bottom.y)*y_increm;
 
     for (int x=bl.x; x<=tr.x; x++) {
         if (x < 0 || x >= width) {continue;}
@@ -75,17 +77,17 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
             if (isLeft(v1, v2, pos) 
                 && isLeft(v2, v3, pos) 
                 && isLeft(v3, v1, pos) 
-                && cur_depth > getDepth(x, y)
+                && cur_depth >= depth_buffer[x + y*width]
                 && cur_depth >= -1
                 && cur_depth <= 1
             ) {
                 setPixel(x, y, color);
                 setDepth(x, y, cur_depth);
             }
-            cur_depth -= normal.y/normal.z;
+            cur_depth += y_increm;
         }
 
-        start_row_depth = start_row_depth - normal.x/normal.z;
+        start_row_depth += x_increm;
         cur_depth = start_row_depth;
     }
 

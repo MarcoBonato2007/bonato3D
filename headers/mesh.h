@@ -21,14 +21,10 @@ struct Vertex {
 struct Mesh {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<uint32_t> colors; // randomly assigned
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
         this->vertices = vertices;
         this->indices = indices;
-        colors = std::vector<uint32_t>(indices.size()/3);
-        std::srand(unsigned(std::time(nullptr)));
-        std::generate(colors.begin(), colors.end(), rand);
     };
 
     void draw() {
@@ -41,9 +37,8 @@ struct Mesh {
             screen_verts.push_back(v_screen);
         }
         for (int i=0; i<indices.size(); i+=3) {
-            
             // Do clipping into more triangles if vertices are off screen?
-            drawTriangle(colors[i/3], screen_verts[indices[i]], screen_verts[indices[i+1]], screen_verts[indices[i+2]]);
+            drawTriangle(0xFFFFFF, screen_verts[indices[i]], screen_verts[indices[i+1]], screen_verts[indices[i+2]]);
         }
 
     }

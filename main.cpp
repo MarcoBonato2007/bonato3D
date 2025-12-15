@@ -23,8 +23,8 @@ void mainLoop(GLFWwindow* window) {
         look_at = get_look_at(pos, pitch, yaw);
         mvp = proj*look_at;
 
-        std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
-        std::fill(depth_buffer.begin(), depth_buffer.end(), -1);
+        frame_buffer = std::vector<uint32_t>(width*height, 0);
+        depth_buffer = std::vector<float>(width*height, -1);
 
         model.draw();
 

@@ -111,10 +111,11 @@ int main(int argc, char *argv[]) {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
+    // write a profiler that outputs average number of draws per second
 
-    // try rendering to a quad instead of using glDrawPixels
-    // is it any faster??
-
+    // Save your progress
+    // Try to rewrite in SDL (easy since all opengl code is inside main.cpp)
+    // Is it faster? good, keep it. Otherwise keep opengl.
     // Now try to remove all the glm use, and optimize math (barycentric interpolate depth and the left-ness thing)
     // Is it faster? good, keep it. Otherwise keep glm.
     // Now 

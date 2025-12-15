@@ -111,7 +111,6 @@ int main(int argc, char *argv[]) {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-
     // try rendering to a quad instead of using glDrawPixels
     // is it any faster??
 

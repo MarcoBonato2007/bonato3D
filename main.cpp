@@ -20,6 +20,9 @@ void mainLoop(GLFWwindow* window) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
+        look_at = get_look_at(pos, pitch, yaw);
+        mvp = proj*look_at;
+
         std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
         std::fill(depth_buffer.begin(), depth_buffer.end(), -1);
 
@@ -93,8 +96,8 @@ int main(int argc, char *argv[]) {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // Fix bugs, glitches, etc.
-        // Why is it so slowwwww? (fill() probably has to do with it)
+    // Speed it up!
+        // Backface cull
     // Then add more meshes / complicated stuff until it's slow.
     // Then work on basic optimizations:
         // automatically exclude backface triangles from drawing

@@ -13,12 +13,12 @@ float yaw = 0;
 void mouse_handler(double dx, double dy) {
     glm::vec3 view_change = {
         dx*(2*near*tan(X_FOV/2)/width), 
-        -dy*(2*near*tan(X_FOV/2)/height), 
+        dy*(2*near*tan(X_FOV/2)/height), 
         near
     };
 
     view_change = glm::normalize(view_change);
-    float yaw_change = asin(-view_change.x);
+    float yaw_change = asin(view_change.x);
     float pitch_change = asin(view_change.y/cos(yaw_change));      
 
     pitch += pitch_change; // * rotation speed

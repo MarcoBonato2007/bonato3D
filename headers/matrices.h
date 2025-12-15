@@ -17,6 +17,8 @@ glm::vec3 Y = glm::vec3 {0, 1, 0};
 glm::vec3 Z = glm::vec3 {0, 0, 1}; // May be unused
 
 glm::mat4 proj;
+glm::mat4 look_at;
+glm::mat4 mvp;
 
 glm::mat4 get_look_at(glm::vec3 pos, float pitch, float yaw) {
     glm::mat4 cam_translate = glm::translate(I, glm::vec3(-pos));

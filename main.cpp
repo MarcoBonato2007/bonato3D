@@ -18,8 +18,8 @@ void mainLoop(GLFWwindow* window) {
     glfwGetCursorPos(window, &cursor_x, &cursor_y);
     glfwGetCursorPos(window, &prev_cursor_x, &prev_cursor_y);
 
-    auto start = std::chrono::system_clock::now();
     int n = 0;
+    auto start = std::chrono::system_clock::now();
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -109,12 +109,7 @@ int main(int argc, char *argv[]) {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // try rendering to a quad instead of using glDrawPixels
-    // is it any faster??
-
-    // Now try to remove all the glm use, and optimize math (barycentric interpolate depth and the left-ness thing)
-    // Is it faster? good, keep it. Otherwise keep glm.
-    // Now 
+    // Now try rendering to a quad instead of using glDrawPixels
 
     // Then add more meshes / complicated stuff until it's slow.
     // Then work on basic optimizations:

@@ -9,29 +9,26 @@ uint32_t width, height;
 std::vector<uint32_t> frame_buffer; // 32-bit RGBA
 std::vector<float> depth_buffer;
 
-void setPixel(uint32_t x, uint32_t y, uint32_t color) {
+inline void setPixel(uint32_t x, uint32_t y, uint32_t color) {
     frame_buffer[x + y*width] = color;
 }
 
-int getDepth(uint32_t x, uint32_t y) {
+inline int getDepth(uint32_t x, uint32_t y) {
     return depth_buffer[x + y*width];
 }
 
-void setDepth(uint32_t x, uint32_t y, float new_depth) {
+inline void setDepth(uint32_t x, uint32_t y, float new_depth) {
     depth_buffer[x + y*width] = new_depth;
 }
 
 // checks if the point c is to the left of line from a to b
 // takes into account the top left rule
-bool isLeft(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
-    glm::vec2 ab = b-a;
-    glm::vec2 ac = c-a;
-
+inline bool isLeft(float ax, float ay, float bx, float by, float cx, float cy) {
     // res is > 0 if (a, b) is left, = 0 if on, and < 0 if right of the line
-    float res = glm::determinant(glm::mat2(ab, ac)); // minus sign due to flipped y axis
+    float res = (bx-ax)*(cy-ay) - (by-ay)*(cx-ax); // minus sign due to flipped y axis
 
     // If this is a left or top edge we want to exclude when res = 0 (top left rule)
-    if ((ab[1] == 0 && ab[0] < 0) || (ab[1] > 0)) {
+    if ((by-ay == 0 && bx-ax < 0) || (by-ay > 0)) {
         return (res > 0);
     }
     else {
@@ -65,19 +62,29 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     // start with depth of top left pixel of bounding box
     float cur_depth = bottom.z + (bl.x+0.5-bottom.x)*x_increm + (bl.y+0.5-bottom.y)*y_increm;
 
-    for (int x=bl.x; x<=tr.x; x++) {
-        if (x < 0 || x >= width) {continue;}
+    int x_min = std::max(0,(int)bl.x);
+    int x_max = std::min((unsigned int)tr.x, width-1);
+    int y_min = std::max(0,(int)bl.y);
+    int y_max = std::min((unsigned int)tr.y, height-1);
 
+    float v1x = v1.x;
+    float v1y = v1.y;
+    float v2x = v2.x;
+    float v2y = v2.y;
+    float v3x = v3.x;
+    float v3y = v3.y;
+
+    for (int x=x_min; x<=x_max; x++) {
         float start_row_depth = cur_depth;
 
-        for (int y=bl.y; y<=tr.y; y++) {
-            if (y < 0 || y >= height) {continue;}
-                
-            glm::vec2 pos = {x+0.5f, y+0.5f};
-            if (isLeft(v1, v2, pos) 
-                && isLeft(v2, v3, pos) 
-                && isLeft(v3, v1, pos) 
-                && cur_depth >= depth_buffer[x + y*width]
+        for (int y=y_min; y<=y_max; y++) {                
+            float x_ac = x+0.5f;
+            float y_ac = y+0.5f;
+
+            if (isLeft(v1x, v1y, v2x, v2y, x_ac, y_ac) 
+                && isLeft(v2x, v2y, v3x, v3y, x_ac, y_ac) 
+                && isLeft(v3x, v3y, v1x, v1y, x_ac, y_ac) 
+                && cur_depth >= getDepth(x,y)
                 && cur_depth >= -1
                 && cur_depth <= 1
             ) {

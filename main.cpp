@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // Now try rendering to a quad instead of using glDrawPixels
+    // optimize the drawing loop as much as possible
 
     // Then add more meshes / complicated stuff until it's slow.
     // Then work on basic optimizations:

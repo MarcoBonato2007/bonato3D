@@ -8,10 +8,6 @@
 #include "headers/drawing.h"
 #include "headers/player.h"
 
-static void err_cb(int error, const char* desc) {
-    printf("GLFW error: %d: %s\n", error, desc);
-}
-
 void mainLoop(GLFWwindow* window) {
     double cursor_x, cursor_y;
     double prev_cursor_x, prev_cursor_y;
@@ -53,12 +49,11 @@ void mainLoop(GLFWwindow* window) {
     glfwTerminate();
 }
 
-void printInfo() {
-    std::cout << "Width: " << width << "\n" << "Height: " << height << std::endl;
-    std::cout << "Aspect: " << aspect << std::endl;
+inline static void err_cb(int error, const char* desc) {
+    printf("GLFW error: %d: %s\n", error, desc);
 }
 
-void init(std::string pathToModel) {
+int main() {
     glfwInit();
     glfwSetErrorCallback(err_cb);
 
@@ -84,36 +79,22 @@ void init(std::string pathToModel) {
     frame_buffer = std::vector<uint32_t>(width*height); // see buffers.h
     depth_buffer = std::vector<float>(width*height);
 
-    model = Model(); // no path provided -> standard cube model
-    // model = Model(pathToModel); // see model.h
+    model = Model(); // "suzanne.blend"
     
-    printInfo();
-
     mainLoop(window);
-}
-
-int main(int argc, char *argv[]) {
-    std::string pathToModel = "";
-    if (argc == 1) {
-        std::cout << "Must enter a single argument: the path to the file you want to display" << std::endl;
-        return 1;
-    }
-    else {
-        pathToModel = argv[1];
-    }
-
-    init(pathToModel);
 }
 
 // main is responsible for initializing glfw and starting a mainloop
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // optimize the drawing loop as much as possible
+    // Add near clipping
+    // add early culling for triangles totally out of view
+    // fix the nasty graphical bugs
 
-    // Then add more meshes / complicated stuff until it's slow.
-    // Then work on basic optimizations:
-        // automatically exclude backface triangles from drawing
-        // Frustum culling
-            // Check bounding boxes in world spaces
-            // Check triangles in clip spaces
+    // check for graphical bugs (try going inside suzanne, moving around, etc.)
+
+    // clean up code
+    // can you optimize the drawing loop more?
+
+    // make a top/bottom skybox to know where you're moving

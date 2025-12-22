@@ -21,10 +21,18 @@ struct Vertex {
 struct Mesh {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    std::vector<uint32_t> colors;
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
         this->vertices = vertices;
         this->indices = indices;
+        
+        colors = {};
+        std::mt19937 rng(time(0));
+        std::uniform_int_distribution<uint32_t> dist(0, 0xFFFFFF00);
+        for (int i=0; i<indices.size()/3; i++) {
+            colors.push_back(0x00000000 | dist(rng));
+        }
     };
 
     void draw() {
@@ -38,7 +46,12 @@ struct Mesh {
         }
         for (int i=0; i<indices.size(); i+=3) {
             // Do clipping into more triangles if vertices are off screen?
-            drawTriangle(0xFFFFFF, screen_verts[indices[i]], screen_verts[indices[i+1]], screen_verts[indices[i+2]]);
+            drawTriangle(
+                colors[i/3], 
+                screen_verts[indices[i]], 
+                screen_verts[indices[i+1]], 
+                screen_verts[indices[i+2]]
+            );
         }
 
     }

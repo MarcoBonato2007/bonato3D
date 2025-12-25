@@ -17,6 +17,8 @@ void mainLoop(GLFWwindow* window) {
     int n = 0;
     auto start = std::chrono::system_clock::now();
 
+    auto cur_time = std::chrono::steady_clock::now();
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -28,22 +30,28 @@ void mainLoop(GLFWwindow* window) {
 
         model.draw();
 
+        auto new_time = std::chrono::steady_clock::now();
         glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, frame_buffer.data());
-
         glfwGetCursorPos(window, &cursor_x, &cursor_y);
-        keyboard_handler(window);
+        keyboard_handler(window, (new_time-cur_time).count());
         mouse_handler(cursor_x-prev_cursor_x, cursor_y-prev_cursor_y);
         prev_cursor_x = cursor_x;
         prev_cursor_y = cursor_y;
+        cur_time = new_time;
 
         glfwSwapBuffers(window);
 
         n++;
+
+        // auto end = std::chrono::system_clock::now();
+        // std::chrono::duration<double> elapsed_seconds = end-start;
+        // if (elapsed_seconds.count() >= 5) {
+        //     break;
+        // }
     }
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
     std::cout << (float)n/elapsed_seconds.count() << std::endl;
     
     glfwTerminate();
@@ -61,6 +69,7 @@ int main() {
     // const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     // width = mode -> width; // available globally in buffers.h
     // height = mode -> height;
+
     width = 800;
     height = 600;
     aspect = (float)width/height;

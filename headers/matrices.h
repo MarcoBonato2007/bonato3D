@@ -23,7 +23,7 @@ glm::mat4 mvp;
 glm::mat4 get_look_at(glm::vec3 pos, float pitch, float yaw) {
     glm::mat4 cam_translate = glm::translate(I, glm::vec3(-pos));
     glm::mat4 cam_rotate = glm::rotate(I, pitch, X) * glm::rotate(I, yaw, Y);
-    glm::mat4 look_at = cam_rotate*cam_translate;
+    look_at = cam_rotate*cam_translate;
     return look_at;
 }
 

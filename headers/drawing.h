@@ -8,18 +8,6 @@ uint32_t width, height;
 std::vector<uint32_t> frame_buffer; // 32-bit RGBA
 std::vector<float> depth_buffer;
 
-inline void setPixel(uint32_t x, uint32_t y, uint32_t color) {
-    frame_buffer[x + y*width] = color;
-}
-
-inline int getDepth(uint32_t x, uint32_t y) {
-    return depth_buffer[x + y*width];
-}
-
-inline void setDepth(uint32_t x, uint32_t y, float new_depth) {
-    depth_buffer[x + y*width] = new_depth;
-}
-
 // checks how much point c is to the left of line from a to b
 inline float leftness(float ax, float ay, float bx, float by, float cx, float cy) {
     // is > 0 if (a, b) is left, = 0 if on, and < 0 if right of the line
@@ -56,38 +44,39 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     float leftness3_start = e3.x*(yf-v3.y) - e3.y*(xf-v3.x);
     bool notleftortop3 = !((e3.y == 0 && e3.x < 0) || (e3.y > 0));
 
-    for (int x=x_min; x<=x_max; x++) {
-        float cur_depth = start_row_depth;
+    int i_1 = x_min + y_min*width;
 
+    for (int y=y_min; y<=y_max; y++) {
+        float cur_depth = start_row_depth;
         float leftness1 = leftness1_start;
         float leftness2 = leftness2_start;
         float leftness3 = leftness3_start;
+        int i = i_1;
 
-        for (int y=y_min; y<=y_max; y++) {                
-            if (
-                (leftness1 > 0 || (leftness1 == 0 && notleftortop1))
-                && (leftness2 > 0 || (leftness2 == 0 && notleftortop2))
-                && (leftness3 > 0 || (leftness3 == 0 && notleftortop3))
-                && cur_depth >= getDepth(x,y)
+        for (int x=x_min; x<=x_max; x++) {                
+            if (cur_depth >= depth_buffer[i]
                 && cur_depth >= -1
                 && cur_depth <= 1
+                && (leftness1 > 0 || (leftness1 == 0 && notleftortop1))
+                && (leftness2 > 0 || (leftness2 == 0 && notleftortop2))
+                && (leftness3 > 0 || (leftness3 == 0 && notleftortop3))
             ) {
-                setPixel(x, y, color);
-                setDepth(x, y, cur_depth);
+                frame_buffer[i] = color;
+                depth_buffer[i] = cur_depth;
             }
 
-            cur_depth += y_increm;
-
-            leftness1 += e1.x;
-            leftness2 += e2.x;
-            leftness3 += e3.x;
+            cur_depth += x_increm;
+            leftness1 -= e1.y;
+            leftness2 -= e2.y;
+            leftness3 -= e3.y;
+            i += 1;
         }
 
-        start_row_depth += x_increm;
-
-        leftness1_start -= e1.y;
-        leftness2_start -= e2.y;
-        leftness3_start -= e3.y;
+        start_row_depth += y_increm;
+        leftness1_start += e1.x;
+        leftness2_start += e2.x;
+        leftness3_start += e3.x;
+        i_1 += width;
     }
 
 }

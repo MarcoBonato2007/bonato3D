@@ -10,6 +10,9 @@ glm::vec3 pos = {0, 0, 0};
 float pitch = 0;
 float yaw = 0;
 
+float nanotoseconds = 1e-9;
+float VEL_MAG = 10.0f;
+
 void mouse_handler(double dx, double dy) {
     glm::vec3 view_change = {
         dx*(2*near*tan(X_FOV/2)/width), 
@@ -21,36 +24,39 @@ void mouse_handler(double dx, double dy) {
     float yaw_change = asin(view_change.x);
     float pitch_change = asin(view_change.y/cos(yaw_change));      
 
-    pitch += pitch_change; // * rotation speed
-    if (pitch > 90) {
-        pitch = 90;
-    }
-    yaw += yaw_change; // * rotation speed
+    pitch += pitch_change;
+    yaw += yaw_change;
 }
 
-void keyboard_handler(GLFWwindow* window) {
-    glm::vec3 pos_change = {0, 0, 0};
+void keyboard_handler(GLFWwindow* window, float delta_time) {
+    glm::vec4 vel = {0, 0, 0, 0};
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        pos_change.z -= 0.1;
+        vel.z -= 1;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        pos_change.z += 0.1;
+        vel.z += 1;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        pos_change.x += 0.1;
+        vel.x += 1;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        pos_change.x -= 0.1;
+        vel.x -= 1;
     }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        pos_change.y += 0.1;
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        vel.y += 1;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        pos_change.y -= 0.1;
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        vel.y -= 1;
     }
 
-    pos += pos_change;
+    vel = glm::rotate(I, -yaw, Y)*glm::rotate(I, -pitch, X)*vel;
+
+    int num_comps = (vel.x != 0) + (vel.y != 0) + (vel.z != 0);
+    if (num_comps != 0) {
+        pos += glm::vec3((float)(delta_time/sqrt(num_comps)*VEL_MAG*nanotoseconds)*vel);
+
+    }
 }
 
 #endif

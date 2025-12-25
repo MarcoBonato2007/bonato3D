@@ -14,18 +14,18 @@
 struct Model {
     std::vector<Mesh> meshes;
 
-    Model() { // standard cube model
+    Model() { // two side by side cubes
         meshes = {
             Mesh(
                 {
+                    Vertex({-1.5f, 0.5f, -2.0f}),
                     Vertex({-0.5f, 0.5f, -2.0f}),
-                    Vertex({0.5f, 0.5f, -2.0f}),
-                    Vertex({0.5f, -0.5f, -2.0f}),
                     Vertex({-0.5f, -0.5f, -2.0f}),
+                    Vertex({-1.5f, -0.5f, -2.0f}),
+                    Vertex({-1.5f, 0.5f, -3.0f}),
                     Vertex({-0.5f, 0.5f, -3.0f}),
-                    Vertex({0.5f, 0.5f, -3.0f}),
-                    Vertex({0.5f, -0.5f, -3.0f}),
-                    Vertex({-0.5f, -0.5f, -3.0f})
+                    Vertex({-0.5f, -0.5f, -3.0f}),
+                    Vertex({-1.5f, -0.5f, -3.0f})
                 }, 
                 {
                     2, 1, 0,
@@ -44,14 +44,14 @@ struct Model {
             ),
             Mesh(
                 {
-                    Vertex({-0.5f, 0.5f, -4.0f}),
-                    Vertex({0.5f, 0.5f, -4.0f}),
-                    Vertex({0.5f, -0.5f, -4.0f}),
-                    Vertex({-0.5f, -0.5f, -4.0f}),
-                    Vertex({-0.5f, 0.5f, -5.0f}),
-                    Vertex({0.5f, 0.5f, -5.0f}),
-                    Vertex({0.5f, -0.5f, -5.0f}),
-                    Vertex({-0.5f, -0.5f, -5.0f})
+                    Vertex({0.5f, 0.5f, -2.0f}),
+                    Vertex({1.5f, 0.5f, -2.0f}),
+                    Vertex({1.5f, -0.5f, -2.0f}),
+                    Vertex({0.5f, -0.5f, -2.0f}),
+                    Vertex({0.5f, 0.5f, -3.0f}),
+                    Vertex({1.5f, 0.5f, -3.0f}),
+                    Vertex({1.5f, -0.5f, -3.0f}),
+                    Vertex({0.5f, -0.5f, -3.0f})
                 }, 
                 {
                     2, 1, 0,

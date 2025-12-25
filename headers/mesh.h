@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 #include <random>
-#include <ctime>
 
 #include "matrices.h"
 #include "player.h"
@@ -28,10 +27,10 @@ struct Mesh {
         this->indices = indices;
         
         colors = {};
-        std::mt19937 rng(time(0));
-        std::uniform_int_distribution<uint32_t> dist(0, 0xFFFFFF00);
         for (int i=0; i<indices.size()/3; i++) {
-            colors.push_back(0x00000000 | dist(rng));
+            uint32_t rand_color = ((rand() & 0x7fffu)<<17 | (rand() & 0x7fffu)<<2 ) | (rand() & 0x7fffu)>>13;
+            rand_color = ((rand_color << 8) >> 8) + 0xFF000000;
+            colors.push_back(((rand() & 0x7fffu)<<17 | (rand() & 0x7fffu)<<2 ) | (rand() & 0x7fffu)>>13);
         }
     };
 

@@ -54,7 +54,7 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
         int i = i_1;
 
         for (int x=x_min; x<=x_max; x++) {                
-            if (cur_depth >= depth_buffer[i]
+            if (cur_depth <= depth_buffer[i]
                 && cur_depth >= -1
                 && cur_depth <= 1
                 && (leftness1 > 0 || (leftness1 == 0 && notleftortop1))

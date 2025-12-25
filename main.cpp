@@ -26,7 +26,7 @@ void mainLoop(GLFWwindow* window) {
         mvp = proj*look_at;
 
         std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
-        std::fill(depth_buffer.begin(), depth_buffer.end(), -1.0f);
+        std::fill(depth_buffer.begin(), depth_buffer.end(), 1.0f);
 
         model.draw();
 
@@ -76,8 +76,8 @@ int main() {
     proj = {
         {1/tan(X_FOV/2), 0, 0, 0}, 
         {0, aspect/tan(X_FOV/2), 0, 0}, 
-        {0, 0, (near+far)/(near-far), -1}, 
-        {0, 0, (2*near*far)/(near-far), 0}
+        {0, 0, -(far+near)/(far-near), -1}, 
+        {0, 0, -(2*near*far)/(far-near), 0}
     };
     GLFWwindow* window = glfwCreateWindow(800, 600, "Engine", NULL, NULL);
     glfwMakeContextCurrent(window);
@@ -88,7 +88,7 @@ int main() {
     frame_buffer = std::vector<uint32_t>(width*height); // see buffers.h
     depth_buffer = std::vector<float>(width*height);
 
-    model = Model(); // "suzanne.blend"
+    model = Model("suzanne.blend"); // "suzanne.blend"
     
     mainLoop(window);
 }
@@ -98,12 +98,10 @@ int main() {
 
 // TODO:
     // Add near clipping
-    // add early culling for triangles totally out of view
-    // fix the nasty graphical bugs
-
     // check for graphical bugs (try going inside suzanne, moving around, etc.)
+    // loook aroud while close
+
+    // add a top/bottom skybox
 
     // clean up code
     // can you optimize the drawing loop more?
-
-    // make a top/bottom skybox to know where you're moving

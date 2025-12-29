@@ -16,16 +16,26 @@ struct Model {
 
     Model() { // two side by side cubes
         meshes = {
+            // Mesh(
+            //     {
+            //         glm::vec3({0, 0.5f, -2.0f}),
+            //         glm::vec3({0.5f, -0.5f, -1.0f}),
+            //         glm::vec3({-0.5f, -0.5f, -1.0f})
+            //     },
+            //     {
+            //         0, 2, 1
+            //     }
+            // )
             Mesh(
                 {
-                    Vertex({-1.5f, 0.5f, -2.0f}),
-                    Vertex({-0.5f, 0.5f, -2.0f}),
-                    Vertex({-0.5f, -0.5f, -2.0f}),
-                    Vertex({-1.5f, -0.5f, -2.0f}),
-                    Vertex({-1.5f, 0.5f, -3.0f}),
-                    Vertex({-0.5f, 0.5f, -3.0f}),
-                    Vertex({-0.5f, -0.5f, -3.0f}),
-                    Vertex({-1.5f, -0.5f, -3.0f})
+                    glm::vec3({-1.5f, 0.5f, -2.0f}),
+                    glm::vec3({-0.5f, 0.5f, -2.0f}),
+                    glm::vec3({-0.5f, -0.5f, -2.0f}),
+                    glm::vec3({-1.5f, -0.5f, -2.0f}),
+                    glm::vec3({-1.5f, 0.5f, -3.0f}),
+                    glm::vec3({-0.5f, 0.5f, -3.0f}),
+                    glm::vec3({-0.5f, -0.5f, -3.0f}),
+                    glm::vec3({-1.5f, -0.5f, -3.0f})
                 }, 
                 {
                     2, 1, 0,
@@ -42,32 +52,32 @@ struct Model {
                     2, 7, 6
                 }
             ),
-            Mesh(
-                {
-                    Vertex({0.5f, 0.5f, -2.0f}),
-                    Vertex({1.5f, 0.5f, -2.0f}),
-                    Vertex({1.5f, -0.5f, -2.0f}),
-                    Vertex({0.5f, -0.5f, -2.0f}),
-                    Vertex({0.5f, 0.5f, -3.0f}),
-                    Vertex({1.5f, 0.5f, -3.0f}),
-                    Vertex({1.5f, -0.5f, -3.0f}),
-                    Vertex({0.5f, -0.5f, -3.0f})
-                }, 
-                {
-                    2, 1, 0,
-                    2, 0, 3,
-                    6, 4, 5,
-                    6, 7, 4,
-                    3, 0, 4,
-                    3, 4, 7,
-                    6, 5, 1,
-                    6, 1, 2,
-                    1, 5, 4, 
-                    1, 4, 0,
-                    2, 3, 7,
-                    2, 7, 6
-                }
-            ),
+            // Mesh(
+            //     {
+            //         glm::vec3({0.5f, 0.5f, -2.0f}),
+            //         glm::vec3({1.5f, 0.5f, -2.0f}),
+            //         glm::vec3({1.5f, -0.5f, -2.0f}),
+            //         glm::vec3({0.5f, -0.5f, -2.0f}),
+            //         glm::vec3({0.5f, 0.5f, -3.0f}),
+            //         glm::vec3({1.5f, 0.5f, -3.0f}),
+            //         glm::vec3({1.5f, -0.5f, -3.0f}),
+            //         glm::vec3({0.5f, -0.5f, -3.0f})
+            //     }, 
+            //     {
+            //         2, 1, 0,
+            //         2, 0, 3,
+            //         6, 4, 5,
+            //         6, 7, 4,
+            //         3, 0, 4,
+            //         3, 4, 7,
+            //         6, 5, 1,
+            //         6, 1, 2,
+            //         1, 5, 4, 
+            //         1, 4, 0,
+            //         2, 3, 7,
+            //         2, 7, 6
+            //     }
+            // ),
         };
     }
     
@@ -98,7 +108,7 @@ struct Model {
     }
 
     Mesh processMesh(aiMesh *mesh, const aiScene *scene) {
-        std::vector<Vertex> vertices;
+        std::vector<glm::vec3> vertices;
         std::vector<unsigned int> indices;
 
         if (mesh->mFaces->mNumIndices != 3) {
@@ -109,7 +119,7 @@ struct Model {
             glm::vec3 pos = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
             // glm::vec3 normal = {mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z};
 
-            vertices.push_back(Vertex(pos)); // normal
+            vertices.push_back(pos); // normal
         }
 
         for (int i=0; i<mesh->mNumFaces; i++) {

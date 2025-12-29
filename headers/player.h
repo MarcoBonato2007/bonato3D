@@ -11,7 +11,7 @@ float pitch = 0;
 float yaw = 0;
 
 float nanotoseconds = 1e-9;
-float VEL_MAG = 10.0f;
+float VEL_MAG = 7.5f;
 
 void mouse_handler(double dx, double dy) {
     glm::vec3 view_change = {

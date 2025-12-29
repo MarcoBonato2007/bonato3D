@@ -97,7 +97,6 @@ int main() {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // Add near clipping
     // check for graphical bugs (try going inside suzanne, moving around, etc.)
     // loook aroud while close
 

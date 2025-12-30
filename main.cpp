@@ -97,10 +97,5 @@ int main() {
 // all glfw and opengl code is contained only inside here.
 
 // TODO:
-    // check for graphical bugs (try going inside suzanne, moving around, etc.)
-    // loook aroud while close
-
     // add a top/bottom skybox
-
-    // clean up code
-    // can you optimize the drawing loop more?
+    // profile and optimize

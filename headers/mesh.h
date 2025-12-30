@@ -66,16 +66,23 @@ struct Mesh {
 
     void draw() {
         std::vector<Triangle4> processed_triangles = {};
-        std::vector<uint32_t> new_colors = {};
         
         for (Triangle3 t: triangles) {
             glm::vec4 v1 = mvp*glm::vec4(t.v1, 1.0);
             glm::vec4 v2 = mvp*glm::vec4(t.v2, 1.0);
             glm::vec4 v3 = mvp*glm::vec4(t.v3, 1.0);
 
+            // check that at least one vertex is inside the frustum
+            if (
+                (abs(v1.x) > v1.w || abs(v1.y) > v1.w || abs(v1.z) > v1.w)
+                && (abs(v2.x) > v2.w || abs(v2.y) > v2.w || abs(v2.z) > v2.w)
+                && (abs(v3.x) > v3.w || abs(v3.y) > v3.w || abs(v3.z) > v3.w)
+            ) {
+                continue;
+            }
+
             // reorder to have those behind near plane first
             // BUT: keep original order (i.e. v1v2v3 or v2v3v1 or v3v1v2)
-
             int num_behind = (v1.z < -v1.w) + (v2.z < -v2.w) + (v3.z < -v3.w);
             if (num_behind == 0) {
                 processed_triangles.push_back(Triangle4(t.color, v1, v2, v3));
@@ -111,7 +118,7 @@ struct Mesh {
             glm::vec3 v3 = glm::vec3(t.v3/t.v3.w);
             v3 = glm::vec3(width*(v3.x+1)/2, height*(v3.y+1)/2, v3.z);
 
-            drawTriangle(t.color, v1, v2, v3);
+            drawTriangle(t.color, v1, v2, v3);  
         }
 
     }

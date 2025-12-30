@@ -18,6 +18,14 @@ inline float leftness(float ax, float ay, float bx, float by, float cx, float cy
 // Each vector is x and y screen (pixel) coordinates along with a normalized [-1, 1] depth (z-value)
 // Note: do NOT floor v1, v2, or v3
 void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
+    glm::vec3 e1 = v2-v1;
+    glm::vec3 e2 = v3-v2;
+    glm::vec3 e3 = v1-v3;
+
+    if (e1.y*e3.x-e1.x*e3.y <= 0) { // triangle is not anticlockwise
+        return;
+    }
+
     // bottom-left and top-right coordinates of triangle bounding box
     glm::vec2 bl = glm::floor(glm::min(v1, glm::min(v2, v3)));
     glm::vec2 tr = glm::ceil(glm::max(v1, glm::max(v2, v3)));
@@ -25,10 +33,6 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     int x_max = std::min((unsigned int)tr.x, width-1);
     int y_min = std::max(0,(int)bl.y);
     int y_max = std::min((unsigned int)tr.y, height-1);
-
-    glm::vec3 e1 = v2-v1;
-    glm::vec3 e2 = v3-v2;
-    glm::vec3 e3 = v1-v3;
     float xf = x_min+0.5;
     float yf = y_min+0.5;
 

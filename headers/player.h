@@ -6,9 +6,9 @@
 
 #include "matrices.h"
 
-glm::vec3 pos = {0, 0, 0};
+glm::vec3 pos = {0, 0, 2};
 float pitch = 0;
-float yaw = 0;
+float yaw = PI/4;
 
 float nanotoseconds = 1e-9;
 float VEL_MAG = 7.5f;

@@ -81,30 +81,4 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
 
 }
 
-void drawSkybox() {
-    // The skybox is a sphere around the camera
-    // The top/bottom is colored black, the circumference is colored white
-
-    float radius = 100;
-
-    float w = near*tan(X_FOV/2);
-    float h = w/aspect;
-
-    int i = 0;
-    for (float y=0.5; y<height; y++) {
-        for (float x=0.5; x<width; x++) {
-            glm::vec4 coords = glm::vec4({w*(2*x/width-1), h*(2*y/height-1), -near, 0});
-            coords = glm::rotate(I, -pitch, X)*coords;
-
-            float deg = abs(glm::normalize(coords).y);
-            char comp = 255-deg*255;
-            uint32_t color = comp + (comp << 8) + (comp << 16);
-
-            frame_buffer[i] = color;
-
-            i++;
-        }
-    }
-}
-
 #endif

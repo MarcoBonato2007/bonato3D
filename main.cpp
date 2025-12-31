@@ -19,13 +19,12 @@ void mainLoop(GLFWwindow* window) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        look_at = get_look_at(pos, pitch, yaw);
-        mvp = proj*look_at;
+        glm::mat4 mvp = proj*get_look_at(pos, pitch, yaw);;
 
         std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
         std::fill(depth_buffer.begin(), depth_buffer.end(), 1.0f);
 
-        model.draw();
+        model.draw(mvp);
 
         auto new_time = std::chrono::steady_clock::now();
 
@@ -46,29 +45,10 @@ void mainLoop(GLFWwindow* window) {
     glfwTerminate();
 }
 
-inline static void err_cb(int error, const char* desc) {
-    printf("GLFW error: %d: %s\n", error, desc);
-}
-
 int main() {
     glfwInit();
-    glfwSetErrorCallback(err_cb);
 
-    // GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    // const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    // width = mode -> width; // available globally in buffers.h
-    // height = mode -> height;
-
-    width = 800;
-    height = 600;
-    aspect = (float)width/height;
-    proj = {
-        {1/tan(X_FOV/2), 0, 0, 0}, 
-        {0, aspect/tan(X_FOV/2), 0, 0}, 
-        {0, 0, -(far+near)/(far-near), -1}, 
-        {0, 0, -(2*near*far)/(far-near), 0}
-    };
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Engine", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "Engine", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // hides cursor
@@ -77,7 +57,7 @@ int main() {
     frame_buffer = std::vector<uint32_t>(width*height); // see buffers.h
     depth_buffer = std::vector<float>(width*height);
 
-    model = Model("suzanne.blend"); // "suzanne.blend"
+    model = Model("suzanne.blend");
     
     mainLoop(window);
 }

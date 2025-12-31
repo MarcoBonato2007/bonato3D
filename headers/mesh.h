@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <random>
 
-#include "matrices.h"
+#include "globals.h"
 #include "drawing.h"
 
 // shifts a,b,c into b,c,a
@@ -22,8 +22,14 @@ inline glm::vec4 homogNearIntersect(glm::vec4 a, glm::vec4 b) {
     // so t = -(a.w+a.z)/(b.w-a.w+b.z-a.z)
 }
 
-inline void showVec3(glm::vec3 a) {
-    std::cout << a.x << " " << a.y << " " << a.z << std::endl;
+inline glm::vec3 homogToScreen(glm::vec4 homogCoord) {
+    glm::vec3 perspdiv = glm::vec3(homogCoord/homogCoord.w);
+    glm::vec3 screen_coord = glm::vec3(
+        width*(perspdiv.x+1)/2, 
+        height*(perspdiv.y+1)/2, 
+        perspdiv.z
+    );
+    return screen_coord;
 }
 
 struct Triangle3 {
@@ -31,6 +37,7 @@ struct Triangle3 {
     glm::vec3 v2;
     glm::vec3 v3;
     uint32_t color;
+    
     Triangle3(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
         this->v1 = v1;
         this->v2 = v2;
@@ -62,7 +69,7 @@ struct Mesh {
         }
     };
 
-    void draw() {
+    void draw(glm::mat4 &mvp) {
         std::vector<Triangle4> processed_triangles = {};
         
         for (Triangle3 t: triangles) {
@@ -70,7 +77,7 @@ struct Mesh {
             glm::vec4 v2 = mvp*glm::vec4(t.v2, 1.0);
             glm::vec4 v3 = mvp*glm::vec4(t.v3, 1.0);
 
-            // check that at least one vertex is inside the frustum
+            // continue if all 3 vertices outside frustum
             if (
                 (abs(v1.x) > v1.w || abs(v1.y) > v1.w || abs(v1.z) > v1.w)
                 && (abs(v2.x) > v2.w || abs(v2.y) > v2.w || abs(v2.z) > v2.w)
@@ -79,14 +86,14 @@ struct Mesh {
                 continue;
             }
 
-            // reorder to have those behind near plane first
-            // BUT: keep original order (i.e. v1v2v3 or v2v3v1 or v3v1v2)
+            // near clipping
+            // lshift is used to reorder vertices while keeping their anticlockwise-ness
             int num_behind = (v1.z < -v1.w) + (v2.z < -v2.w) + (v3.z < -v3.w);
             if (num_behind == 0) {
                 processed_triangles.push_back(Triangle4(t.color, v1, v2, v3));
             }
             else if (num_behind == 1) {
-                while (v1.z >= -v1.w) {
+                while (v1.z >= -v1.w) { // have v1 be the vertex behind the near plane
                     lshift(v1, v2, v3);
                 }
                 glm::vec4 intersect1 = homogNearIntersect(v1, v2);
@@ -96,7 +103,7 @@ struct Mesh {
                 processed_triangles.push_back(Triangle4(t.color, intersect2, v2, v3));
             }
             else if (num_behind == 2) {
-                while (v3.z < -v3.w) {
+                while (v3.z < -v3.w) { // have v3 be the vertex in front of the near plane
                     lshift(v1, v2, v3);
                 }
                 glm::vec4 intersect1 = homogNearIntersect(v1, v3);
@@ -107,16 +114,15 @@ struct Mesh {
         }
                         
         for (Triangle4 t: processed_triangles) {
-            glm::vec3 v1 = glm::vec3(t.v1/t.v1.w);
-            v1 = glm::vec3(width*(v1.x+1)/2, height*(v1.y+1)/2, v1.z);
+            // perform perspective division and ndc to screen coords conversion
+            // and call drawTriangle
 
-            glm::vec3 v2 = glm::vec3(t.v2/t.v2.w);
-            v2 = glm::vec3(width*(v2.x+1)/2, height*(v2.y+1)/2, v2.z);
-            
-            glm::vec3 v3 = glm::vec3(t.v3/t.v3.w);
-            v3 = glm::vec3(width*(v3.x+1)/2, height*(v3.y+1)/2, v3.z);
-
-            drawTriangle(t.color, v1, v2, v3);  
+            drawTriangle(
+                t.color, 
+                homogToScreen(t.v1), 
+                homogToScreen(t.v2), 
+                homogToScreen(t.v3)
+            );  
         }
 
     }

@@ -107,9 +107,7 @@ struct Model {
 
         for (int i=0; i<mesh->mNumVertices; i++) {
             glm::vec3 pos = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
-            // glm::vec3 normal = {mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z};
-
-            vertices.push_back(pos); // normal
+            vertices.push_back(pos);
         }
 
         for (int i=0; i<mesh->mNumFaces; i++) {
@@ -122,9 +120,9 @@ struct Model {
         return Mesh(vertices, indices);
     }
 
-    void draw() {
+    void draw(glm::mat4 &mvp) {
         for (Mesh m: meshes) {
-            m.draw();
+            m.draw(mvp);
         }
     }
 };

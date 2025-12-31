@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glfw/glfw3.h>
 
-#include "matrices.h"
+#include "globals.h"
 
-glm::vec3 pos = {0, 0, 2};
+glm::vec3 pos = {0, 0, 2}; // start at 2 so at to not be inside suzanne
 float pitch = 0;
 float yaw = 0;
 
@@ -54,8 +54,9 @@ void keyboard_handler(GLFWwindow* window, float delta_time) {
 
     int num_comps = (vel.x != 0) + (vel.y != 0) + (vel.z != 0);
     if (num_comps != 0) {
-        pos += glm::vec3((float)(delta_time/sqrt(num_comps)*VEL_MAG*nanotoseconds)*vel);
-
+        // add optimized displacement to position
+        // note that sqrt(num_comps) = |vel|
+        pos += glm::vec3((float)((delta_time*nanotoseconds)*VEL_MAG/sqrt(num_comps))*vel);
     }
 }
 

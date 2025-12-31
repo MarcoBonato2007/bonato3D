@@ -4,31 +4,25 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
-uint32_t width, height;
+#include "player.h"
+
 std::vector<uint32_t> frame_buffer; // 32-bit RGBA
 std::vector<float> depth_buffer;
 
-// checks how much point c is to the left of line from a to b
-inline float leftness(float ax, float ay, float bx, float by, float cx, float cy) {
-    // is > 0 if (a, b) is left, = 0 if on, and < 0 if right of the line
-    return (bx-ax)*(cy-ay) - (by-ay)*(cx-ax);
-}
-
-// Triangle vertices must be counterclockwise
 // Each vector is x and y screen (pixel) coordinates along with a normalized [-1, 1] depth (z-value)
-// Note: do NOT floor v1, v2, or v3
 void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     glm::vec3 e1 = v2-v1;
     glm::vec3 e2 = v3-v2;
     glm::vec3 e3 = v1-v3;
 
-    if (e1.y*e3.x-e1.x*e3.y <= 0) { // triangle is not anticlockwise
+    if (e1.y*e3.x-e1.x*e3.y <= 0) { // if triangle is clockwise
         return;
     }
 
     // bottom-left and top-right coordinates of triangle bounding box
     glm::vec2 bl = glm::floor(glm::min(v1, glm::min(v2, v3)));
     glm::vec2 tr = glm::ceil(glm::max(v1, glm::max(v2, v3)));
+
     int x_min = std::max(0,(int)bl.x);
     int x_max = std::min((unsigned int)tr.x, width-1);
     int y_min = std::max(0,(int)bl.y);
@@ -36,11 +30,13 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     float xf = x_min+0.5;
     float yf = y_min+0.5;
 
+    // calculations for depth interpolation
     glm::vec3 normal = glm::cross(e1, e2);
     float x_increm = -normal.x/normal.z;
     float y_increm = -normal.y/normal.z;
     float start_row_depth = v1.z + (xf-v1.x)*x_increm + (yf-v1.y)*y_increm;
 
+    // calculations for "is pixel in triangle" interpolation
     float leftness1_start = e1.x*(yf-v1.y) - e1.y*(xf-v1.x);
     bool notleftortop1 = !((e1.y == 0 && e1.x < 0) || (e1.y > 0));
     float leftness2_start = e2.x*(yf-v2.y) - e2.y*(xf-v2.x);
@@ -73,7 +69,7 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
             leftness1 -= e1.y;
             leftness2 -= e2.y;
             leftness3 -= e3.y;
-            i += 1;
+            i++;
         }
 
         start_row_depth += y_increm;
@@ -83,6 +79,32 @@ void drawTriangle(uint32_t color, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
         i_1 += width;
     }
 
+}
+
+void drawSkybox() {
+    // The skybox is a sphere around the camera
+    // The top/bottom is colored black, the circumference is colored white
+
+    float radius = 100;
+
+    float w = near*tan(X_FOV/2);
+    float h = w/aspect;
+
+    int i = 0;
+    for (float y=0.5; y<height; y++) {
+        for (float x=0.5; x<width; x++) {
+            glm::vec4 coords = glm::vec4({w*(2*x/width-1), h*(2*y/height-1), -near, 0});
+            coords = glm::rotate(I, -pitch, X)*coords;
+
+            float deg = abs(glm::normalize(coords).y);
+            char comp = 255-deg*255;
+            uint32_t color = comp + (comp << 8) + (comp << 16);
+
+            frame_buffer[i] = color;
+
+            i++;
+        }
+    }
 }
 
 #endif

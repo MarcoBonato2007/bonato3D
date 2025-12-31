@@ -5,8 +5,8 @@
 #include <chrono>
 
 #include "headers/model.h"
-#include "headers/drawing.h"
 #include "headers/player.h"
+#include "headers/drawing.h"
 
 void mainLoop(GLFWwindow* window) {
     double cursor_x, cursor_y;
@@ -28,6 +28,7 @@ void mainLoop(GLFWwindow* window) {
         std::fill(frame_buffer.begin(), frame_buffer.end(), 0);
         std::fill(depth_buffer.begin(), depth_buffer.end(), 1.0f);
 
+        drawSkybox();
         model.draw();
 
         auto new_time = std::chrono::steady_clock::now();

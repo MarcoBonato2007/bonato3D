@@ -3,8 +3,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "drawing.h"
-
+uint32_t width, height;
 float PI = 3.141592653;
 float aspect;
 float X_FOV = PI/2;

@@ -5,7 +5,7 @@
 #include <random>
 
 #include "matrices.h"
-#include "player.h"
+#include "drawing.h"
 
 // shifts a,b,c into b,c,a
 inline void lshift(glm::vec4 &a, glm::vec4 &b, glm::vec4 &c) {
@@ -58,8 +58,6 @@ struct Mesh {
     Mesh(std::vector<glm::vec3> vertices, std::vector<unsigned int> indices) {
         for (int i=0; i<indices.size(); i+=3) {
             uint32_t rand_color = ((rand() & 0x7fffu)<<17 | (rand() & 0x7fffu)<<2 ) | (rand() & 0x7fffu)>>13;
-            rand_color = ((rand_color << 8) >> 8) + 0xFF000000; // ensure opaque
-
             triangles.push_back(Triangle3(rand_color, vertices[indices[i]], vertices[indices[i+1]], vertices[indices[i+2]]));
         }
     };

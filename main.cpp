@@ -64,7 +64,3 @@ int main() {
 
 // main is responsible for initializing glfw and starting a mainloop
 // all glfw and opengl code is contained only inside here.
-
-// TODO:
-    // add a top/bottom skybox
-    // profile and optimize
